@@ -199,7 +199,6 @@ public class RobotTemplate extends SimpleRobot
         {
             System.out.println("Party time!");
             //Party Time !!!
-            waitSasha(time-wait.get());
         }
     }
 
@@ -274,11 +273,6 @@ public class RobotTemplate extends SimpleRobot
         compressor1.start();
         solenoidShooter.set(DoubleSolenoid.Value.kForward);
         VisionThingy vision = new VisionThingy();
-        /*String distance = new String();
-         int feet;
-         double inchesDecimal;
-         * */
-
         while(isAutonomous() && isEnabled())
         {
             superDrive(1.0, gyro.getAngle());
@@ -301,26 +295,6 @@ public class RobotTemplate extends SimpleRobot
                 break;
             }
             fire();
-
-
-
-
-            // fire();            
-            /*
-             feet = 0;
-             inchesDecimal = 0;
-             //vision.mainVision();
-             for(double i = ultrasonicDistance(); i > 0; i--)
-             {
-             feet++;
-             inchesDecimal = i;
-             }
-             feet--;
-             inchesDecimal *= 12;
-
-             SmartDashboard.putDouble("Feet", (feet));
-             SmartDashboard.putDouble("Inches", inchesDecimal);
-             * */
             checkBattery();
         }
 

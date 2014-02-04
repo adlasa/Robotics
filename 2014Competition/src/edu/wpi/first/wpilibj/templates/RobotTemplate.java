@@ -6,7 +6,7 @@
 /*----------------------------------------------------------------------------*/
 package edu.wpi.first.wpilibj.templates;
 
-import edu.wpi.first.wpilibj.Accelerometer;
+import edu.wpi.first.wpilibj.ADXL345_I2C;
 import edu.wpi.first.wpilibj.AnalogChannel;
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
@@ -25,8 +25,12 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class RobotTemplate extends SimpleRobot
 {
+    public final int DIGITAL_MODULE_SLOT = 2;
+    public final int ANALOG_MODULE_SLOT = 1;
+    public final int SOLENOID_MODULE_SLOT = 3;
+
     //uses 1 & 2
-    Gyro gyro = new Gyro(1, 1);
+    Gyro gyro = new Gyro(ANALOG_MODULE_SLOT, 1);
     Joystick steerWheel = new Joystick(1);
     Joystick throttle = new Joystick(2);
     Victor leftDrive1 = new Victor(1);
@@ -52,9 +56,9 @@ public class RobotTemplate extends SimpleRobot
     DoubleSolenoid solenoidArm1 = new DoubleSolenoid(7, 1, 2);
     DoubleSolenoid solenoidArm2 = new DoubleSolenoid(7, 3, 4);
     DoubleSolenoid solenoidShooter = new DoubleSolenoid(7, 5, 6);
-    Accelerometer accelerometer = new Accelerometer(2); // <<< not certain about the channel for this one 
+    ADXL345_I2C accel = new ADXL345_I2C(DIGITAL_MODULE_SLOT,ADXL345_I2C.DataFormat_Range.k2G); // <<< not certain about the channel for this one 
     Timer time = new Timer();
-    double accel;
+    double acceleration;
     double velocity = 0;
     double distance;
     //using MaxBotix HRLV-EZ4
@@ -169,8 +173,9 @@ public class RobotTemplate extends SimpleRobot
     }
     public double accelCalc()
     {
-        accel = accelerometer.getAcceleration();
-        velocity += accel * 9.80665;
+        velocity = 0;
+        //accel = accelerometer.getAcceleration();
+        //velocity += accel * 9.80665;
         return velocity;
     }
 
@@ -360,39 +365,10 @@ public class RobotTemplate extends SimpleRobot
             SmartDashboard.putDouble("Throttle", -(throttle.getRawAxis(2)));
             SmartDashboard.putDouble("swRot", swAdjust(steerWheel.getAxis(Joystick.AxisType.kX)));
 
-            /*
-            SmartDashboard.putBoolean("Turn mode", (Button1.get() || Button2.get()));
-
-            SmartDashboard.putDouble("Angle :", gyro.getAngle());
-            SmartDashboard.putDouble("Rate: ", gyro.getRate());
-            SmartDashboard.putDouble("Straight Angle: ", straightAngle);
-            SmartDashboard.putDouble("Difference: ", straightAngle - gyro.getAngle());
-            * */
-
-            /*
-             straightAngle = (swAdjust(steerWheel.getAxis(Joystick.AxisType.kX)) * 180) + gyro.getAngle();
-
-             pCorrection = (-gyro.getRate()) * kP;
-             iCorrection = (straightAngle - gyro.getAngle()) * kI;
-             dCorrection = 0 - pastRate * kD;
-             totalCorrection = pCorrection + iCorrection + dCorrection;
-
-             totalCorrection /= 10;
-             if(totalCorrection > 1)
-             {
-             totalCorrection = 1;
-             }
-             else if(totalCorrection < -1)
-             {
-             totalCorrection = -1;
-             }
-             * */
-            //SmartDashboard.putDouble("Total Correction", totalCorrection);
-
             if(Button1.get() || Button2.get())
             {
                 turnSet(swAdjust(steerWheel.getAxis(Joystick.AxisType.kX)) * 0.65);
-                //rDp = (-swAdjust(steerWheel.getAxis(Joystick.AxisType.kX)) * 0.65);
+
             }
             else
             {
@@ -406,33 +382,6 @@ public class RobotTemplate extends SimpleRobot
             else
             SmartDashboard.putDouble("Distance from startpoint according to accelerometer:", distance);
             
-            
-            
-            /*
-             else
-             {
-             if(totalCorrection < 0)
-             {
-             lDp = (-throttle.getRawAxis(2) * (1 - Math.abs(totalCorrection)));
-             rDp = (-throttle.getRawAxis(2));
-             }
-             else if(totalCorrection > 0)
-             {
-             lDp = (-throttle.getRawAxis(2));
-             rDp = (-throttle.getRawAxis(2) * (1 - Math.abs(totalCorrection)));
-             }
-             else
-             {
-             lDp = (-throttle.getRawAxis(2));
-             rDp = (-throttle.getRawAxis(2));
-
-             }
-             }*/
-
-            //Output motor powers to SMartDashboard
-            //leftSet(lDp);
-            //rightSet(rDp);
-
             //cameraThingy();
 
             SmartDashboard.putDouble("Gyro", gyro.getAngle());

@@ -64,7 +64,9 @@ public class RobotTemplate extends SimpleRobot
         SmartDashboard.putDouble("Ultrasonic Voltage", ultrasonic.getVoltage());
         return ((ultrasonic.getVoltage()) * 3.47826087) - 0.25;
     }
-
+/*
+ * This is where the main PID driving code has been moved, so don't panic
+ */
     public void superDrive(double power, double direction)
     {
         double straightAngle;

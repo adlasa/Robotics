@@ -145,7 +145,7 @@ public class RobotTemplate extends SimpleRobot
         if(stupidDriverStation.getBatteryVoltage() < 12)
         {
             SmartDashboard.putBoolean("Replace Battery NOW", true);
-        }
+        }    
         else
         {
             SmartDashboard.putBoolean("Replace Battery NOW", false);
@@ -199,6 +199,7 @@ public class RobotTemplate extends SimpleRobot
         {
             System.out.println("Party time!");
             //Party Time !!!
+            waitSasha(time-wait.get());
         }
     }
 
@@ -213,24 +214,21 @@ public class RobotTemplate extends SimpleRobot
 
     public void computerAssistedFire()
     {
-        Timer fireTime = new Timer();
-        double maxFireTime = 2.5;
         double ultrasonicDistance = ultrasonicDistance();
-        boolean targetRight = false;
         turnSet(1);
         waitSasha(0.1);
         bothSet(0);
 
-        if(ultrasonicDistance() > distance)
+        if(ultrasonicDistance > distance)
         {
             turnSet(-0.4);
             while(isEnabled())
             {
-                if(ultrasonicDistance() > distance)
+                if(ultrasonicDistance > distance)
                 {
                     break;
                 }
-                distance = ultrasonicDistance();
+                distance = ultrasonicDistance;
             }
         }
         else
@@ -238,11 +236,11 @@ public class RobotTemplate extends SimpleRobot
             turnSet(0.4);
             while(isEnabled())
             {
-                if(ultrasonicDistance() > distance)
+                if(ultrasonicDistance > distance)
                 {
                     break;
                 }
-                distance = ultrasonicDistance();
+                distance = ultrasonicDistance;
             }
         }
         bothSet(0);
@@ -334,12 +332,7 @@ public class RobotTemplate extends SimpleRobot
         //declare array for holding motor powers
         Timer heartbeat = new Timer();
         heartbeat.start();
-        if(Button3.get())
-        {
-            time.reset();
-            distance = 0;
-        }
-        else
+
         //main loop
         {
             while(isOperatorControl() && isEnabled())
@@ -359,15 +352,6 @@ public class RobotTemplate extends SimpleRobot
                 else
                 {
                     superDrive(-throttle.getRawAxis(2), ((swAdjust(steerWheel.getAxis(Joystick.AxisType.kX)) * 180) + gyro.getAngle()));
-                }
-                if(Button3.get())
-                {
-                    time.reset();
-                    distance = 0;
-                }
-                else
-                {
-                    SmartDashboard.putDouble("Distance from startpoint according to accelerometer:", distance);
                 }
 
                 //cameraThingy();

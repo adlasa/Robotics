@@ -28,7 +28,6 @@ public class RobotTemplate extends SimpleRobot
     public final int DIGITAL_MODULE_SLOT = 2;
     public final int ANALOG_MODULE_SLOT = 1;
     public final int SOLENOID_MODULE_SLOT = 3;
-
     //uses 1 & 2
     Gyro gyro = new Gyro(ANALOG_MODULE_SLOT, 1);
     Joystick steerWheel = new Joystick(1);
@@ -56,7 +55,7 @@ public class RobotTemplate extends SimpleRobot
     DoubleSolenoid solenoidArm1 = new DoubleSolenoid(7, 1, 2);
     DoubleSolenoid solenoidArm2 = new DoubleSolenoid(7, 3, 4);
     DoubleSolenoid solenoidShooter = new DoubleSolenoid(7, 5, 6);
-    ADXL345_I2C accel = new ADXL345_I2C(DIGITAL_MODULE_SLOT,ADXL345_I2C.DataFormat_Range.k2G); // <<< not certain about the channel for this one 
+    ADXL345_I2C accel = new ADXL345_I2C(DIGITAL_MODULE_SLOT, ADXL345_I2C.DataFormat_Range.k2G); // <<< not certain about the channel for this one 
     Timer time = new Timer();
     double acceleration;
     double velocity = 0;
@@ -68,9 +67,10 @@ public class RobotTemplate extends SimpleRobot
         SmartDashboard.putDouble("Ultrasonic Voltage", ultrasonic.getVoltage());
         return ((ultrasonic.getVoltage()) * 3.47826087) - 0.25;
     }
-/*
- * This is where the main PID driving code has been moved, so don't panic
- */
+    /*
+     * This is where the main PID driving code has been moved, so don't panic
+     */
+
     public void superDrive(double power, double direction)
     {
         double straightAngle;
@@ -171,12 +171,12 @@ public class RobotTemplate extends SimpleRobot
         waitSasha(1);//change to whatever it takes to fire
         catapultFire.setDirection(Relay.Direction.kBoth/*change to make it whatever it stops shooting the thingies */);
     }
-    public double accelCalc()
+
+    public void outputAccelData()
     {
-        velocity = 0;
-        //accel = accelerometer.getAcceleration();
-        //velocity += accel * 9.80665;
-        return velocity;
+        SmartDashboard.putDouble("X Acceleration", accel.getAcceleration(ADXL345_I2C.Axes.kX));
+        SmartDashboard.putDouble("Y Acceleration", accel.getAcceleration(ADXL345_I2C.Axes.kY));
+        SmartDashboard.putDouble("Z Acceleration", accel.getAcceleration(ADXL345_I2C.Axes.kZ));
     }
 
     //Adjust the steering whell input to normalize from -1 to 1
@@ -215,7 +215,7 @@ public class RobotTemplate extends SimpleRobot
     {
         Timer fireTime = new Timer();
         double maxFireTime = 2.5;
-        double distance = ultrasonicDistance();
+        double ultrasonicDistance = ultrasonicDistance();
         boolean targetRight = false;
         turnSet(1);
         waitSasha(0.1);
@@ -280,7 +280,7 @@ public class RobotTemplate extends SimpleRobot
          int feet;
          double inchesDecimal;
          * */
-        
+
         while(isAutonomous() && isEnabled())
         {
             superDrive(1.0, gyro.getAngle());
@@ -295,7 +295,7 @@ public class RobotTemplate extends SimpleRobot
             }
             else if(ultrasonicDistance() < 14)
             {
-                bothSet(-1.0); 
+                bothSet(-1.0);
             }
             else
             {
@@ -303,10 +303,10 @@ public class RobotTemplate extends SimpleRobot
                 break;
             }
             fire();
-            
 
-            
-            
+
+
+
             // fire();            
             /*
              feet = 0;
@@ -336,83 +336,72 @@ public class RobotTemplate extends SimpleRobot
         heartbeat.start();
         if(Button3.get())
         {
-                time.reset();
-                distance = 0;
+            time.reset();
+            distance = 0;
         }
         else
-        distance = accelCalc() * time.get();
-        
-        
-
-
-        /*double straightAngle = 0;
-         double pCorrection;
-         2    double iCorrection;
-         double dCorrection;
-         double totalCorrection;
-         double pastRate = 0;
-         double kP = 0.25, kI = 1.0, kD = 0.25;
-         double lDp;
-         double rDp;
-         * */
         //main loop
-        while(isOperatorControl() && isEnabled())
         {
-            checkBattery();
-            SmartDashboard.putDouble("Heartbeat", heartbeat.get());
-            heartbeat.reset();
-            //output data to SmartDashboard
-            SmartDashboard.putDouble("Throttle", -(throttle.getRawAxis(2)));
-            SmartDashboard.putDouble("swRot", swAdjust(steerWheel.getAxis(Joystick.AxisType.kX)));
+            while(isOperatorControl() && isEnabled())
+            {
+                checkBattery();
+                SmartDashboard.putDouble("Heartbeat", heartbeat.get());
+                heartbeat.reset();
+                //output data to SmartDashboard
+                SmartDashboard.putDouble("Throttle", -(throttle.getRawAxis(2)));
+                SmartDashboard.putDouble("swRot", swAdjust(steerWheel.getAxis(Joystick.AxisType.kX)));
 
-            if(Button1.get() || Button2.get())
-            {
-                turnSet(swAdjust(steerWheel.getAxis(Joystick.AxisType.kX)) * 0.65);
-
-            }
-            else
-            {
-                superDrive(-throttle.getRawAxis(2), ((swAdjust(steerWheel.getAxis(Joystick.AxisType.kX)) * 180) + gyro.getAngle()));
-            }    
-            if(Button3.get())
-            {
-                time.reset();
-                distance = 0;
-            }
-            else
-            SmartDashboard.putDouble("Distance from startpoint according to accelerometer:", distance);
-            
-            //cameraThingy();
-
-            SmartDashboard.putDouble("Gyro", gyro.getAngle());
-            // Buttons 10 and 11 for the picker-upper arms
-            if(throttle.getRawButton(10))
-            {
-                solenoidArm1.set(DoubleSolenoid.Value.kForward);
-                solenoidArm2.set(DoubleSolenoid.Value.kForward);
-            }
-            else if(throttle.getRawButton(11))
-            {
-                solenoidArm1.set(DoubleSolenoid.Value.kReverse);
-                solenoidArm2.set(DoubleSolenoid.Value.kReverse);
-            }
-            else
-            {
-                solenoidArm1.set(DoubleSolenoid.Value.kOff);
-                solenoidArm2.set(DoubleSolenoid.Value.kOff);
-            }
-            // firing using the trigger
-            Timer timer = new Timer();
-            if (throttle.getRawButton(1))
-            {
-                fire();
-                
-                solenoidShooter.set(DoubleSolenoid.Value.kReverse);
-                timer.start();
-                if (timer.get() == 1) // 1 or 1000?
+                if(Button1.get() || Button2.get())
                 {
-                    solenoidShooter.set(DoubleSolenoid.Value.kForward);
-                    timer.reset();
+                    turnSet(swAdjust(steerWheel.getAxis(Joystick.AxisType.kX)) * 0.65);
+
+                }
+                else
+                {
+                    superDrive(-throttle.getRawAxis(2), ((swAdjust(steerWheel.getAxis(Joystick.AxisType.kX)) * 180) + gyro.getAngle()));
+                }
+                if(Button3.get())
+                {
+                    time.reset();
+                    distance = 0;
+                }
+                else
+                {
+                    SmartDashboard.putDouble("Distance from startpoint according to accelerometer:", distance);
+                }
+
+                //cameraThingy();
+
+                SmartDashboard.putDouble("Gyro", gyro.getAngle());
+                // Buttons 10 and 11 for the picker-upper arms
+                if(throttle.getRawButton(10))
+                {
+                    solenoidArm1.set(DoubleSolenoid.Value.kForward);
+                    solenoidArm2.set(DoubleSolenoid.Value.kForward);
+                }
+                else if(throttle.getRawButton(11))
+                {
+                    solenoidArm1.set(DoubleSolenoid.Value.kReverse);
+                    solenoidArm2.set(DoubleSolenoid.Value.kReverse);
+                }
+                else
+                {
+                    solenoidArm1.set(DoubleSolenoid.Value.kOff);
+                    solenoidArm2.set(DoubleSolenoid.Value.kOff);
+                }
+                // firing using the trigger
+                Timer timer = new Timer();
+                if(throttle.getRawButton(1))
+                {
+                    fire();
+
+                    solenoidShooter.set(DoubleSolenoid.Value.kReverse);
+                    timer.start();
+                    if(timer.get() == 1) // 1 or 1000?
+                    {
+                        solenoidShooter.set(DoubleSolenoid.Value.kForward);
+                        timer.reset();
+                    }
                 }
             }
         }
@@ -423,5 +412,8 @@ public class RobotTemplate extends SimpleRobot
      */
     public void test()
     {
+        while(isTest() && isEnabled()) {
+            outputAccelData();
+        }
     }
 }

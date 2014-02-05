@@ -40,9 +40,11 @@ public class RobotTemplate extends SimpleRobot
     Victor rightDrive3 = new Victor(6);
     Victor intake = new Victor(7);
     Victor catapult1 = new Victor(8);
-    Relay intake1 = new Relay(1);
-    Relay intake2 = new Relay(2);
+    
+    //Relay intake1 = new Relay(1);
+    //Relay intake2 = new Relay(2);
     Relay catapultFire = new Relay(3);
+    
     DriverStation stupidDriverStation = DriverStation.getInstance();
     AnalogChannel ultrasonic = new AnalogChannel(3);
     JoystickButton Button1 = new JoystickButton(steerWheel, 1);
@@ -51,10 +53,12 @@ public class RobotTemplate extends SimpleRobot
     AxisCamera camera;          // the axis camera object (connected to the switch)
     CriteriaCollection cc;      // the criteria for doing the particle filter operation
     final int AREA_MINIMUM = 150;
+    /*
     Compressor compressor1 = new Compressor(1, 1);
     DoubleSolenoid solenoidArm1 = new DoubleSolenoid(7, 1, 2);
     DoubleSolenoid solenoidArm2 = new DoubleSolenoid(7, 3, 4);
     DoubleSolenoid solenoidShooter = new DoubleSolenoid(7, 5, 6);
+    */
     ADXL345_I2C accel = new ADXL345_I2C(DIGITAL_MODULE_SLOT, ADXL345_I2C.DataFormat_Range.k2G); // <<< not certain about the channel for this one 
     Timer time = new Timer();
     double acceleration;
@@ -270,8 +274,10 @@ public class RobotTemplate extends SimpleRobot
 
     public void autonomous()
     {
+        /*
         compressor1.start();
         solenoidShooter.set(DoubleSolenoid.Value.kForward);
+        * */
         VisionThingy vision = new VisionThingy();
         while(isAutonomous() && isEnabled())
         {
@@ -332,7 +338,7 @@ public class RobotTemplate extends SimpleRobot
 
                 SmartDashboard.putDouble("Gyro", gyro.getAngle());
                 // Buttons 10 and 11 for the picker-upper arms
-                if(throttle.getRawButton(10))
+                /*if(throttle.getRawButton(10))
                 {
                     solenoidArm1.set(DoubleSolenoid.Value.kForward);
                     solenoidArm2.set(DoubleSolenoid.Value.kForward);
@@ -360,7 +366,7 @@ public class RobotTemplate extends SimpleRobot
                         solenoidShooter.set(DoubleSolenoid.Value.kForward);
                         timer.reset();
                     }
-                }
+                } */
             }
         }
     }
@@ -372,6 +378,7 @@ public class RobotTemplate extends SimpleRobot
     {
         while(isTest() && isEnabled()) {
             outputAccelData();
+            checkBattery();
         }
     }
 }

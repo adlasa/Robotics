@@ -25,7 +25,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class RobotTemplate extends SimpleRobot
 {
-    public final int DIGITAL_MODULE_SLOT = 2;
+    public final int DIGITAL_MODULE_SLOT = 1;
     public final int ANALOG_MODULE_SLOT = 1;
     public final int SOLENOID_MODULE_SLOT = 3;
     //uses 1 & 2

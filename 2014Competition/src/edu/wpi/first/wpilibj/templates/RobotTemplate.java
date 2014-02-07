@@ -59,7 +59,8 @@ public class RobotTemplate extends SimpleRobot
     DoubleSolenoid solenoidArm2 = new DoubleSolenoid(7, 3, 4);
     DoubleSolenoid solenoidShooter = new DoubleSolenoid(7, 5, 6);
     */
-    ADXL345_I2C accel = new ADXL345_I2C(DIGITAL_MODULE_SLOT, ADXL345_I2C.DataFormat_Range.k2G); // <<< not certain about the channel for this one 
+    ADXL345_I2C accel = new ADXL345_I2C(DIGITAL_MODULE_SLOT, ADXL345_I2C.DataFormat_Range.k2G);
+    ADXL345_I2C.AllAxes axes = new ADXL345_I2C.AllAxes();
     Timer time = new Timer();
     double acceleration;
     double velocity = 0;
@@ -178,9 +179,9 @@ public class RobotTemplate extends SimpleRobot
 
     public void outputAccelData()
     {
-        SmartDashboard.putDouble("X Acceleration", accel.getAcceleration(ADXL345_I2C.Axes.kX));
-        SmartDashboard.putDouble("Y Acceleration", accel.getAcceleration(ADXL345_I2C.Axes.kY));
-        SmartDashboard.putDouble("Z Acceleration", accel.getAcceleration(ADXL345_I2C.Axes.kZ));
+        SmartDashboard.putDouble("X Acceleration", axes.XAxis);
+        SmartDashboard.putDouble("Y Acceleration", axes.YAxis);
+        SmartDashboard.putDouble("Z Acceleration", axes.ZAxis);
     }
 
     //Adjust the steering whell input to normalize from -1 to 1
@@ -279,6 +280,7 @@ public class RobotTemplate extends SimpleRobot
         solenoidShooter.set(DoubleSolenoid.Value.kForward);
         * */
         VisionThingy vision = new VisionThingy();
+        
         while(isAutonomous() && isEnabled())
         {
             superDrive(1.0, gyro.getAngle());

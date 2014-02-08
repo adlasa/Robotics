@@ -47,6 +47,8 @@ public class VisionThingy
     
     double distance;
     boolean isHot;
+    double[][] verticalTargetLocations;
+    double[][] horizontalTargetLocations;
 
     public class Scores
     {
@@ -75,6 +77,14 @@ public class VisionThingy
         return isHot;
     }
     
+    public double[][] horizontalTargetLocations() {
+        return horizontalTargetLocations;
+    }
+    
+    public double[][] verticalTargetLocations() {
+        return verticalTargetLocations;
+    }
+    
     public void mainVision()
     {
         try
@@ -99,7 +109,7 @@ public class VisionThingy
             filteredImage.write("/filteredImage.bmp");
 
             //iterate through each particle and score to see if it is a target
-           Scores scores[] = new Scores[filteredImage.getNumberParticles()];
+            Scores scores[] = new Scores[filteredImage.getNumberParticles()];
             horizontalTargetCount = verticalTargetCount = 0;
 
             //System.out.println(filteredImage.getNumberParticles());
@@ -122,12 +132,17 @@ public class VisionThingy
                     {
                         //System.out.println("particle: " + i + "is a Horizontal Target centerX: " + report.center_mass_x + "centerY: " + report.center_mass_y);
                         SmartDashboard.putString("Horizontal Target Finding Status", ("particle: " + i + "is a Horizontal Target centerX: " + report.center_mass_x + "centerY: " + report.center_mass_y));
+                        horizontalTargetLocations[horizontalTargetCount][0] = report.center_mass_x;
+                        horizontalTargetLocations[horizontalTargetCount][1] = report.center_mass_y;
                         horizontalTargets[horizontalTargetCount++] = i; //Add particle to target array and increment count
+                        
                     }
                     else if(scoreCompare(scores[i], true))
                     {
                         //System.out.println("particle: " + i + "is a Vertical Target centerX: " + report.center_mass_x + "centerY: " + report.center_mass_y);
                         SmartDashboard.putString("Vertical Target Finding Status", ("particle: " + i + "is a Vertical Target centerX: " + report.center_mass_x + "centerY: " + report.center_mass_y));
+                        horizontalTargetLocations[verticalTargetCount][0] = report.center_mass_x;
+                        horizontalTargetLocations[verticalTargetCount][1] = report.center_mass_y;
                         verticalTargets[verticalTargetCount++] = i;  //Add particle to target array and increment count
                     }
                     else

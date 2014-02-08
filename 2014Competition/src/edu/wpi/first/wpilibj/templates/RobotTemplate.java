@@ -27,7 +27,7 @@ public class RobotTemplate extends SimpleRobot
 {
     public final int DIGITAL_MODULE_SLOT = 1;
     public final int ANALOG_MODULE_SLOT = 1;
-    public final int SOLENOID_MODULE_SLOT = 3;
+    public final int SOLENOID_MODULE_SLOT = 1;
     //uses 1 & 2
     Gyro gyro = new Gyro(ANALOG_MODULE_SLOT, 1);
     Joystick steerWheel = new Joystick(1);
@@ -40,6 +40,7 @@ public class RobotTemplate extends SimpleRobot
     Victor rightDrive3 = new Victor(6);
     Victor intake = new Victor(7);
     Victor catapult1 = new Victor(8);
+    Victor catapult2 = new Victor(9);
     //Relay intake1 = new Relay(1);
     //Relay intake2 = new Relay(2);
     Relay catapultFire = new Relay(3);
@@ -163,6 +164,9 @@ public class RobotTemplate extends SimpleRobot
         // motor on intake
         solenoidArm1.set(DoubleSolenoid.Value.kForward);
         solenoidArm2.set(DoubleSolenoid.Value.kForward);
+        waitBrendan(1);//changes
+        solenoidArm1.set(DoubleSolenoid.Value.kOff);
+        solenoidArm2.set(DoubleSolenoid.Value.kOff);
         // stop motor on intake?
     }
 
@@ -170,6 +174,17 @@ public class RobotTemplate extends SimpleRobot
     {
         solenoidArm1.set(DoubleSolenoid.Value.kReverse);
         solenoidArm2.set(DoubleSolenoid.Value.kReverse);
+        waitBrendan(1);//change 
+        solenoidArm1.set(DoubleSolenoid.Value.kOff);
+        solenoidArm2.set(DoubleSolenoid.Value.kOff);
+    }
+    
+    public void intake() {
+        lowerIntake();
+        intake.set(1);//could be reversed
+        waitBrendan(1);//guess-change to time needed to intake
+        raiseIntake();
+        intake.set(0);
     }
 
     public void robotInit()
@@ -183,10 +198,10 @@ public class RobotTemplate extends SimpleRobot
     {
         //do whatever the heck the shooter team made to make it shoot thingies at the other thingies
         catapultFire.setDirection(Relay.Direction.kBoth/*change to what make it shoot things*/);
-        waitSasha(1);//change to whatever it takes to fire
+        waitBrendan(1);//change to whatever it takes to fire
         catapultFire.setDirection(Relay.Direction.kBoth/*change to make it whatever it stops shooting the thingies */);
         solenoidShooter.set(DoubleSolenoid.Value.kReverse);
-        waitSasha(1);
+        waitBrendan(1);
         solenoidShooter.set(DoubleSolenoid.Value.kForward);
     }
 
@@ -210,7 +225,7 @@ public class RobotTemplate extends SimpleRobot
         return i;
     }
 
-    public void waitSasha(double time)
+    public void waitBrendan(double time)
     {
         Timer wait = new Timer();
         wait.start();
@@ -234,7 +249,7 @@ public class RobotTemplate extends SimpleRobot
     {
         distance = ultrasonicDistance();
         turnSet(1);
-        waitSasha(0.1);
+        waitBrendan(0.1);
         bothSet(0);
 
         if(ultrasonicDistance() > distance)

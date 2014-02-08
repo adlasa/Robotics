@@ -19,7 +19,6 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.Victor;
 import edu.wpi.first.wpilibj.buttons.JoystickButton;
 import edu.wpi.first.wpilibj.image.CriteriaCollection;
-import edu.wpi.first.wpilibj.image.NIVision;
 import edu.wpi.first.wpilibj.camera.AxisCamera;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -189,9 +188,7 @@ public class RobotTemplate extends SimpleRobot
 
     public void robotInit()
     {
-        camera = AxisCamera.getInstance();  // get an instance of the camera
-        cc = new CriteriaCollection();      // create the criteria for the particle filter
-        cc.addCriteria(NIVision.MeasurementType.IMAQ_MT_AREA, AREA_MINIMUM, 65535, false);
+        
     }
 
     public void fire()
@@ -309,8 +306,32 @@ public class RobotTemplate extends SimpleRobot
          solenoidShooter.set(DoubleSolenoid.Value.kForward);
          * */
         VisionThingy vision = new VisionThingy();
+        final double IDEAL_DISTANCE = 14;
         double[][] horizontalTargetLocations;
         double[][] verticalTargetLocations;
+        if(stupidDriverStation.getDigitalIn(2)) {
+            while(isAutonomous() && isEnabled()) {
+                superDrive(1.0, 0);
+                if(ultrasonicDistance() >= IDEAL_DISTANCE && ultrasonicDistance() <= IDEAL_DISTANCE+0.5)
+                {
+                    superDrive(-1.0, 0);
+                    break;
+                }
+                else if(ultrasonicDistance() > IDEAL_DISTANCE+0.5)
+                {
+                    superDrive(1.0, 0);
+                }
+                else if(ultrasonicDistance() < IDEAL_DISTANCE)
+                {
+                    superDrive(-1.0, 0);
+                }
+                else
+                {
+                    System.out.println("Something is going wrong I don't know what happening aaaaaaaaaahhhhhhhhhhhh");
+                    break;
+                }
+            }
+        }
 
         if(stupidDriverStation.getDigitalIn(1))
         {

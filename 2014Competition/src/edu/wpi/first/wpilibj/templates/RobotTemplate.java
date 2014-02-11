@@ -18,8 +18,6 @@ import edu.wpi.first.wpilibj.Relay;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.Victor;
 import edu.wpi.first.wpilibj.buttons.JoystickButton;
-import edu.wpi.first.wpilibj.image.CriteriaCollection;
-import edu.wpi.first.wpilibj.camera.AxisCamera;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class RobotTemplate extends SimpleRobot
@@ -27,6 +25,8 @@ public class RobotTemplate extends SimpleRobot
     public final int DIGITAL_MODULE_SLOT = 1;
     public final int ANALOG_MODULE_SLOT = 1;
     public final int SOLENOID_MODULE_SLOT = 1;
+    public final double MAX_MOTOR_POWER_FOR_COMPRESSION = 3;
+    public final double IDEAL_SHOOTING_DISTANCE = 14;
     //uses 1 & 2
     Gyro gyro = new Gyro(ANALOG_MODULE_SLOT, 1);
     Joystick steerWheel = new Joystick(1);
@@ -40,16 +40,14 @@ public class RobotTemplate extends SimpleRobot
     Victor intake = new Victor(7);
     Victor catapult1 = new Victor(8);
     Victor catapult2 = new Victor(9);
-    //Relay intake1 = new Relay(1);
-    //Relay intake2 = new Relay(2);
+    Relay intake1 = new Relay(1);
+    Relay intake2 = new Relay(2);
     Relay catapultFire = new Relay(3);
     DriverStation stupidDriverStation = DriverStation.getInstance();
     AnalogChannel ultrasonic = new AnalogChannel(3);
     JoystickButton Button1 = new JoystickButton(steerWheel, 1);
     JoystickButton Button2 = new JoystickButton(steerWheel, 2);
     JoystickButton Button3 = new JoystickButton(throttle, 1);
-    AxisCamera camera;          // the axis camera object (connected to the switch)
-    CriteriaCollection cc;      // the criteria for doing the particle filter operation
     final int AREA_MINIMUM = 150;
     Compressor compressor1 = new Compressor(1, 1);
     DoubleSolenoid solenoidArm1 = new DoubleSolenoid(7, 1, 2);
@@ -71,6 +69,18 @@ public class RobotTemplate extends SimpleRobot
     /*
      * This is where the main PID driving code has been moved, so don't panic
      */
+
+    public void compressorCheckThingy()
+    {
+        if((Math.abs(leftDrive1.get()) + Math.abs(leftDrive2.get()) + Math.abs(leftDrive3.get()) + Math.abs(rightDrive1.get()) + Math.abs(rightDrive2.get()) + Math.abs(rightDrive3.get())) < MAX_MOTOR_POWER_FOR_COMPRESSION)
+        {
+            compressor1.start();
+        }
+        else
+        {
+            compressor1.stop();
+        }
+    }
 
     public void superDrive(double power, double direction)
     {
@@ -116,16 +126,16 @@ public class RobotTemplate extends SimpleRobot
     public void leftSet(double lDp)
     {
         leftDrive1.set(lDp);
-        leftDrive2.set(lDp);
-        leftDrive3.set(lDp);
+        //leftDrive2.set(lDp);
+        //leftDrive3.set(lDp);
         SmartDashboard.putDouble("Left Drive Power", lDp);
     }
 
     public void rightSet(double rDp)
     {
         rightDrive1.set(-rDp);
-        rightDrive2.set(-rDp);
-        rightDrive3.set(-rDp);
+        //rightDrive2.set(-rDp);
+        //rightDrive3.set(-rDp);
         SmartDashboard.putDouble("Left Drive Power", rDp);
     }
 
@@ -163,7 +173,7 @@ public class RobotTemplate extends SimpleRobot
         // motor on intake
         solenoidArm1.set(DoubleSolenoid.Value.kForward);
         solenoidArm2.set(DoubleSolenoid.Value.kForward);
-        waitBrendan(1);//changes
+        waitBrendan(1);//change
         solenoidArm1.set(DoubleSolenoid.Value.kOff);
         solenoidArm2.set(DoubleSolenoid.Value.kOff);
         // stop motor on intake?
@@ -177,8 +187,9 @@ public class RobotTemplate extends SimpleRobot
         solenoidArm1.set(DoubleSolenoid.Value.kOff);
         solenoidArm2.set(DoubleSolenoid.Value.kOff);
     }
-    
-    public void intake() {
+
+    public void intake()
+    {
         lowerIntake();
         intake.set(1);//could be reversed
         waitBrendan(1);//guess-change to time needed to intake
@@ -188,7 +199,6 @@ public class RobotTemplate extends SimpleRobot
 
     public void robotInit()
     {
-        
     }
 
     public void fire()
@@ -245,6 +255,7 @@ public class RobotTemplate extends SimpleRobot
     public void computerAssistedFire()
     {
         distance = ultrasonicDistance();
+        double ultrasonicDistance;
         turnSet(1);
         waitBrendan(0.1);
         bothSet(0);
@@ -276,16 +287,17 @@ public class RobotTemplate extends SimpleRobot
         bothSet(0);
         while(isEnabled())
         {
-            if(ultrasonicDistance() >= 14 && ultrasonicDistance() <= 14.5)
+            ultrasonicDistance = ultrasonicDistance();
+            if(ultrasonicDistance >= IDEAL_SHOOTING_DISTANCE && ultrasonicDistance <= IDEAL_SHOOTING_DISTANCE + 0.5)
             {
                 bothSet(0);
                 break;
             }
-            else if(ultrasonicDistance() > 14.5)
+            else if(ultrasonicDistance > IDEAL_SHOOTING_DISTANCE + 0.5)
             {
                 bothSet(0.4);
             }
-            else if(ultrasonicDistance() < 14)
+            else if(ultrasonicDistance < IDEAL_SHOOTING_DISTANCE)
             {
                 bothSet(-0.4);
             }
@@ -306,102 +318,101 @@ public class RobotTemplate extends SimpleRobot
          solenoidShooter.set(DoubleSolenoid.Value.kForward);
          * */
         VisionThingy vision = new VisionThingy();
-        final double IDEAL_DISTANCE = 14;
+        final double IDEAL_DISTANCE = IDEAL_SHOOTING_DISTANCE;
         double[][] horizontalTargetLocations;
         double[][] verticalTargetLocations;
-        if(stupidDriverStation.getDigitalIn(2)) {
-            while(isAutonomous() && isEnabled()) {
-                superDrive(1.0, 0);
-                if(ultrasonicDistance() >= IDEAL_DISTANCE && ultrasonicDistance() <= IDEAL_DISTANCE+0.5)
-                {
-                    superDrive(-1.0, 0);
-                    break;
-                }
-                else if(ultrasonicDistance() > IDEAL_DISTANCE+0.5)
-                {
-                    superDrive(1.0, 0);
-                }
-                else if(ultrasonicDistance() < IDEAL_DISTANCE)
-                {
-                    superDrive(-1.0, 0);
-                }
-                else
-                {
-                    System.out.println("Something is going wrong I don't know what happening aaaaaaaaaahhhhhhhhhhhh");
-                    break;
-                }
-            }
+        if(stupidDriverStation.getDigitalIn(4))
+        {
+            System.out.println("Not doing anything");
+            return;
         }
-
+        /*
+         if(stupidDriverStation.getDigitalIn(2)) {
+         superDrive(0.4, 0);
+         Timer heartbeat = new Timer();
+         heartbeat.start();
+         double ultrasonicDistance;
+         while(isAutonomous() && isEnabled()) {
+         compressorCheckThingy();
+         ultrasonicDistance = ultrasonicDistance();
+         SmartDashboard.putDouble("Heartbeat", heartbeat.get());
+         SmartDashboard.putDouble("Ultrasonic Distance", ultrasonicDistance);
+         heartbeat.reset();
+         heartbeat.start();
+         if(ultrasonicDistance >= IDEAL_DISTANCE && ultrasonicDistance <= IDEAL_DISTANCE+0.5)
+         {
+         superDrive(0,0);
+         System.out.println("I'm here!");
+         }
+         else if(ultrasonicDistance > IDEAL_DISTANCE+0.5)
+         {
+         superDrive(0.3, 0);
+         SmartDashboard.putString("Forward/Back", "Forward");
+         }
+         else if(ultrasonicDistance < IDEAL_DISTANCE)
+         {
+         superDrive(-0.3, 0);
+         SmartDashboard.putString("Forward/Back", "Backward");
+         }
+         else
+         {
+         System.out.println("Something is going wrong I don't know what happening aaaaaaaaaahhhhhhhhhhhh");
+         break;
+         }
+         }
+         bothSet(0);
+         System.out.println("Pew pew pew");
+         }
+         */
+        //fire with pickup
         if(stupidDriverStation.getDigitalIn(1))
         {
             while(isAutonomous() && isEnabled())
             {
+                compressorCheckThingy();
                 horizontalTargetLocations = vision.horizontalTargetLocations();
                 verticalTargetLocations = vision.verticalTargetLocations();
                 Timer timer = new Timer();
 
-                superDrive(1.0, 0);
-                if(ultrasonicDistance() >= 14 && ultrasonicDistance() <= 14.5)
-                {
-                    bothSet(0);
-                    break;
-                }
-                else if(ultrasonicDistance() > 14.5)
-                {
-                    bothSet(1.0);
-                }
-                else if(ultrasonicDistance() < 14)
-                {
-                    bothSet(-1.0);
-                }
-                else
-                {
-                    System.out.println("Something is going wrong I don't know what happening aaaaaaaaaahhhhhhhhhhhh");
-                    break;
-                }
-                fire();
-                // check if moved?
-                lowerIntake();
-                timer.start();
-                if(timer.get() == 0.5)
-                {
-                    raiseIntake();
-                    timer.stop();
-                }
-                raiseIntake();
+                computerAssistedFire();
+                intake();
                 fire();
                 checkBattery();
             }
         }
-        else
+        //Fire without pickup
+        if(stupidDriverStation.getDigitalIn(3))
         {
-            while(isAutonomous() && isEnabled())
+            vision.mainVision();
+            if(vision.isHot())
             {
-                horizontalTargetLocations = vision.horizontalTargetLocations();
-                verticalTargetLocations = vision.verticalTargetLocations();
-                superDrive(1.0, 0);
-                if(ultrasonicDistance() >= 14 && ultrasonicDistance() <= 14.5)
+                while(isAutonomous() && isEnabled())
                 {
-                    bothSet(0);
-                    break;
+                    compressorCheckThingy();
+                    horizontalTargetLocations = vision.horizontalTargetLocations();
+                    verticalTargetLocations = vision.verticalTargetLocations();
+                    computerAssistedFire();
+                    checkBattery();
                 }
-                else if(ultrasonicDistance() > 14.5)
-                {
-                    superDrive(1.0, 0);
-                }
-                else if(ultrasonicDistance() < 14)
-                {
-                    bothSet(-1.0);
-                }
-                else
-                {
-                    System.out.println("Something is going wrong I don't know what happening aaaaaaaaaahhhhhhhhhhhh");
-                    break;
-                }
-                fire();
-                checkBattery();
             }
+            else
+            {
+                int i = 0;
+                while(isAutonomous() && isEnabled() && i <= 50) {
+                    waitBrendan(0.1);
+                    i++;
+                }
+                waitBrendan(5);
+                while(isAutonomous() && isEnabled())
+                {
+                    compressorCheckThingy();
+                    horizontalTargetLocations = vision.horizontalTargetLocations();
+                    verticalTargetLocations = vision.verticalTargetLocations();
+                    computerAssistedFire();
+                    checkBattery();
+                }
+            }
+
         }
     }
 
@@ -420,10 +431,10 @@ public class RobotTemplate extends SimpleRobot
                 //output data to SmartDashboard
                 SmartDashboard.putDouble("Throttle", -(throttle.getRawAxis(2)));
                 SmartDashboard.putDouble("swRot", swAdjust(steerWheel.getAxis(Joystick.AxisType.kX)));
-
+                SmartDashboard.putDouble("Ultrasonic Distance", ultrasonicDistance());
                 if(Button1.get() || Button2.get())
                 {
-                    turnSet(swAdjust(steerWheel.getAxis(Joystick.AxisType.kX)) * 0.65);
+                    turnSet(swAdjust(steerWheel.getAxis(Joystick.AxisType.kX)));
                 }
                 else
                 {
@@ -431,26 +442,21 @@ public class RobotTemplate extends SimpleRobot
                 }
 
                 SmartDashboard.putDouble("Gyro", gyro.getAngle());
-
-                // Buttons 10 and 11 for the picker-upper arms
-                if(throttle.getRawButton(10))
+                //intake
+                if(throttle.getRawButton(2))
                 {
-                    lowerIntake();
-                }
-                else if(throttle.getRawButton(11))
-                {
-                    raiseIntake();
-                }
-                else
-                {
-                    solenoidArm1.set(DoubleSolenoid.Value.kOff);
-                    solenoidArm2.set(DoubleSolenoid.Value.kOff);
+                    intake();
                 }
                 // firing using the trigger
                 if(throttle.getRawButton(1))
                 {
                     fire();
 
+                }
+                //firing with computer help
+                if(throttle.getRawButton(3))
+                {
+                    computerAssistedFire();
                 }
             }
         }
@@ -463,7 +469,8 @@ public class RobotTemplate extends SimpleRobot
     {
         while(isTest() && isEnabled())
         {
-            outputAccelData();
+            //outputAccelData();
+            SmartDashboard.putDouble("Ultrasonic Distance", ultrasonicDistance());
             checkBattery();
         }
     }

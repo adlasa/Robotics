@@ -31,6 +31,7 @@ public class RobotTemplate extends SimpleRobot
     Gyro gyro = new Gyro(ANALOG_MODULE_SLOT, 1);
     Joystick steerWheel = new Joystick(1);
     Joystick throttle = new Joystick(2);
+    Joystick xbox = new Joystick(3);
     Victor leftDrive1 = new Victor(1);
     Victor leftDrive2 = new Victor(2);
     Victor leftDrive3 = new Victor(3);
@@ -90,7 +91,7 @@ public class RobotTemplate extends SimpleRobot
         double dCorrection;
         double totalCorrection;
         double pastRate = 0;
-        double kP = 0.25, kI = 1.0, kD = 0.25;
+        final double kP = 0.25, kI = 1.0, kD = 0.25;
         straightAngle = (direction) + gyro.getAngle();
         //straightAngle = direction;
         pCorrection = (-gyro.getRate()) * kP;
@@ -121,6 +122,67 @@ public class RobotTemplate extends SimpleRobot
         {
             bothSet(power);
         }
+    }
+
+    public void wallDistance(final double distance)
+    {
+        final double kP = -0.125;
+
+        double cP;
+        
+        double power;
+
+        double ultrasonicDistance;
+        
+        double straightAngle;
+        double pCorrection;
+        double iCorrection;
+        double dCorrection;
+        double totalCorrection;
+        double pastRate = 0;
+        final double GkP = 0.25, GkI = 1.0, GkD = 0.25;
+        straightAngle = gyro.getAngle();
+
+        while(isEnabled())
+        {
+            ultrasonicDistance = ultrasonicDistance();
+            cP = distance - ultrasonicDistance;
+            power = 1.0*cP;
+
+            pCorrection = (-gyro.getRate()) * GkP;
+            iCorrection = (straightAngle - gyro.getAngle()) * GkI;
+            dCorrection = 0 - pastRate * GkD;
+            totalCorrection = pCorrection + iCorrection + dCorrection;
+
+            totalCorrection /= 10;
+            if(totalCorrection > 1)
+            {
+                totalCorrection = 1;
+            }
+            else if(totalCorrection < -1)
+            {
+                totalCorrection = -1;
+            }
+            if(totalCorrection < 0)
+            {
+                leftSet(power * (1 - Math.abs(totalCorrection)));
+                rightSet(power);
+            }
+            else if(totalCorrection > 0)
+            {
+                leftSet(power);
+                rightSet(power * (1 - Math.abs(totalCorrection)));
+            }
+            else
+            {
+                bothSet(power);
+            }
+            if (Math.abs(ultrasonicDistance-distance) < 0.25) {
+                break;
+            }
+            bothSet(0);
+        }
+        
     }
 
     public void leftSet(double lDp)
@@ -255,7 +317,6 @@ public class RobotTemplate extends SimpleRobot
     public void computerAssistedFire()
     {
         distance = ultrasonicDistance();
-        double ultrasonicDistance;
         turnSet(1);
         waitBrendan(0.1);
         bothSet(0);
@@ -284,30 +345,7 @@ public class RobotTemplate extends SimpleRobot
                 distance = ultrasonicDistance();
             }
         }
-        bothSet(0);
-        while(isEnabled())
-        {
-            ultrasonicDistance = ultrasonicDistance();
-            if(ultrasonicDistance >= IDEAL_SHOOTING_DISTANCE && ultrasonicDistance <= IDEAL_SHOOTING_DISTANCE + 0.5)
-            {
-                bothSet(0);
-                break;
-            }
-            else if(ultrasonicDistance > IDEAL_SHOOTING_DISTANCE + 0.5)
-            {
-                bothSet(0.4);
-            }
-            else if(ultrasonicDistance < IDEAL_SHOOTING_DISTANCE)
-            {
-                bothSet(-0.4);
-            }
-            else
-            {
-                System.out.println("Something is going wrong I don't know what happening aaaaaaaaaahhhhhhhhhhhh");
-                break;
-            }
-        }
-        bothSet(0);
+        wallDistance(IDEAL_SHOOTING_DISTANCE);
         fire();
     }
 
@@ -327,7 +365,7 @@ public class RobotTemplate extends SimpleRobot
             return;
         }
         /*
-         if(stupidDriverStation.getDigitalIn(2)) {
+         if(stupidDriverStation.getDigitalIn(5)) {
          superDrive(0.4, 0);
          Timer heartbeat = new Timer();
          heartbeat.start();
@@ -364,8 +402,9 @@ public class RobotTemplate extends SimpleRobot
          System.out.println("Pew pew pew");
          }
          */
+
         //fire with pickup
-        if(stupidDriverStation.getDigitalIn(1))
+        if(stupidDriverStation.getDigitalIn(2))
         {
             while(isAutonomous() && isEnabled())
             {
@@ -398,7 +437,8 @@ public class RobotTemplate extends SimpleRobot
             else
             {
                 int i = 0;
-                while(isAutonomous() && isEnabled() && i <= 50) {
+                while(isAutonomous() && isEnabled() && i <= 50)
+                {
                     waitBrendan(0.1);
                     i++;
                 }
@@ -432,29 +472,36 @@ public class RobotTemplate extends SimpleRobot
                 SmartDashboard.putDouble("Throttle", -(throttle.getRawAxis(2)));
                 SmartDashboard.putDouble("swRot", swAdjust(steerWheel.getAxis(Joystick.AxisType.kX)));
                 SmartDashboard.putDouble("Ultrasonic Distance", ultrasonicDistance());
-                if(Button1.get() || Button2.get())
+                if(!stupidDriverStation.getDigitalIn(1))
                 {
-                    turnSet(swAdjust(steerWheel.getAxis(Joystick.AxisType.kX)));
+                    if(Button1.get() || Button2.get())
+                    {
+                        turnSet(swAdjust(steerWheel.getAxis(Joystick.AxisType.kX)));
+                    }
+                    else
+                    {
+                        superDrive(-throttle.getRawAxis(2), swAdjust(steerWheel.getAxis(Joystick.AxisType.kX)) * 180);
+                    }
                 }
                 else
                 {
-                    superDrive(-throttle.getRawAxis(2), swAdjust(steerWheel.getAxis(Joystick.AxisType.kX)) * 180);
+                    leftSet(xbox.getRawAxis(2));
+                    rightSet(xbox.getRawAxis(5));
                 }
-
+                
                 SmartDashboard.putDouble("Gyro", gyro.getAngle());
                 //intake
-                if(throttle.getRawButton(2))
+                if(throttle.getRawButton(2) || xbox.getRawButton(4)) // Y
                 {
                     intake();
                 }
                 // firing using the trigger
-                if(throttle.getRawButton(1))
+                if(throttle.getRawButton(1) || xbox.getRawButton(2)) // B
                 {
                     fire();
-
                 }
                 //firing with computer help
-                if(throttle.getRawButton(3))
+                if(throttle.getRawButton(3) || xbox.getRawButton(3)) // X
                 {
                     computerAssistedFire();
                 }

@@ -85,19 +85,16 @@ public class RobotTemplate extends SimpleRobot
 
     public void superDrive(double power, double direction)
     {
-        double straightAngle;
         double pCorrection;
         double iCorrection;
-        double dCorrection;
         double totalCorrection;
-        double pastRate = 0;
-        final double kP = 0.25, kI = 1.0, kD = 0.25;
-        straightAngle = (direction) + gyro.getAngle();
+        final double kP = 0.25, kI = 1.0;
+        //d was 0.25
+        direction = (direction) + gyro.getAngle();
         //straightAngle = direction;
         pCorrection = (-gyro.getRate()) * kP;
-        iCorrection = (straightAngle - gyro.getAngle()) * kI;
-        dCorrection = 0 - pastRate * kD;
-        totalCorrection = pCorrection + iCorrection + dCorrection;
+        iCorrection = (direction - gyro.getAngle()) * kI;
+        totalCorrection = pCorrection + iCorrection;
 
         totalCorrection /= 10;
         if(totalCorrection > 1)
@@ -137,22 +134,19 @@ public class RobotTemplate extends SimpleRobot
         double straightAngle;
         double pCorrection;
         double iCorrection;
-        double dCorrection;
         double totalCorrection;
-        double pastRate = 0;
-        final double GkP = 0.25, GkI = 1.0, GkD = 0.25;
+        final double GkP = 0.25, GkI = 1.0;
         straightAngle = gyro.getAngle();
 
         while(isEnabled())
         {
             ultrasonicDistance = ultrasonicDistance();
-            cP = distance - ultrasonicDistance;
+            cP = (distance - ultrasonicDistance)*kP;
             power = 1.0*cP;
 
             pCorrection = (-gyro.getRate()) * GkP;
             iCorrection = (straightAngle - gyro.getAngle()) * GkI;
-            dCorrection = 0 - pastRate * GkD;
-            totalCorrection = pCorrection + iCorrection + dCorrection;
+            totalCorrection = pCorrection + iCorrection;
 
             totalCorrection /= 10;
             if(totalCorrection > 1)
@@ -250,11 +244,18 @@ public class RobotTemplate extends SimpleRobot
         solenoidArm2.set(DoubleSolenoid.Value.kOff);
     }
 
+    public void expel() {
+        //kick out the ball
+        intake.set(-1);
+        lowerIntake();
+        intake.set(0);
+        raiseIntake();
+    }
+    
     public void intake()
     {
         lowerIntake();
         intake.set(1);//could be reversed
-        waitBrendan(1);//guess-change to time needed to intake
         raiseIntake();
         intake.set(0);
     }
@@ -297,12 +298,15 @@ public class RobotTemplate extends SimpleRobot
     public void waitBrendan(double time)
     {
         Timer wait = new Timer();
-        wait.start();
+        //wait.start();
+        wait.delay(time);
+        /*
         while(wait.get() < time)
         {
             System.out.println("Party time!");
             //Party Time !!!
         }
+        * */
     }
 
     public void disabled()
@@ -436,12 +440,7 @@ public class RobotTemplate extends SimpleRobot
             }
             else
             {
-                int i = 0;
-                while(isAutonomous() && isEnabled() && i <= 50)
-                {
-                    waitBrendan(0.1);
-                    i++;
-                }
+                
                 waitBrendan(5);
                 while(isAutonomous() && isEnabled())
                 {
@@ -491,19 +490,22 @@ public class RobotTemplate extends SimpleRobot
                 
                 SmartDashboard.putDouble("Gyro", gyro.getAngle());
                 //intake
-                if(throttle.getRawButton(2) || xbox.getRawButton(4)) // Y
+                if(throttle.getRawButton(4) || xbox.getRawButton(4)) // Y on xbox
                 {
                     intake();
                 }
                 // firing using the trigger
-                if(throttle.getRawButton(1) || xbox.getRawButton(2)) // B
+                if(throttle.getRawButton(3) || xbox.getRawButton(2)) // B on xbox
                 {
                     fire();
                 }
                 //firing with computer help
-                if(throttle.getRawButton(3) || xbox.getRawButton(3)) // X
+                if(throttle.getRawButton(2) || xbox.getRawButton(3)) // X on xbox
                 {
                     computerAssistedFire();
+                }
+                if(throttle.getRawButton(5) || xbox.getRawButton(1)) {
+                    expel();
                 }
             }
         }

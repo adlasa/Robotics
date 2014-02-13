@@ -9,6 +9,7 @@ package edu.wpi.first.wpilibj.templates;
 import edu.wpi.first.wpilibj.ADXL345_I2C;
 import edu.wpi.first.wpilibj.AnalogChannel;
 import edu.wpi.first.wpilibj.Compressor;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Gyro;
@@ -32,6 +33,7 @@ public class RobotTemplate extends SimpleRobot
     Joystick steerWheel = new Joystick(1);
     Joystick throttle = new Joystick(2);
     Joystick xbox = new Joystick(3);
+    Joystick extra = new Joystick(4);
     Victor leftDrive1 = new Victor(1);
     Victor leftDrive2 = new Victor(2);
     Victor leftDrive3 = new Victor(3);
@@ -49,6 +51,7 @@ public class RobotTemplate extends SimpleRobot
     JoystickButton Button1 = new JoystickButton(steerWheel, 1);
     JoystickButton Button2 = new JoystickButton(steerWheel, 2);
     JoystickButton Button3 = new JoystickButton(throttle, 1);
+    DigitalInput limCatapult = new DigitalInput(3);
     final int AREA_MINIMUM = 150;
     Compressor compressor1 = new Compressor(1, 1);
     DoubleSolenoid solenoidArm1 = new DoubleSolenoid(7, 1, 2);
@@ -60,6 +63,8 @@ public class RobotTemplate extends SimpleRobot
     double acceleration;
     double velocity = 0;
     double distance;
+    //0 = outside robot, 1 = in shooter, 2 = in assist position
+    int ballPosition = 1;
     //using MaxBotix HRLV-EZ4
 
     public double ultrasonicDistance()
@@ -126,11 +131,11 @@ public class RobotTemplate extends SimpleRobot
         final double kP = -0.125;
 
         double cP;
-        
+
         double power;
 
         double ultrasonicDistance;
-        
+
         double straightAngle;
         double pCorrection;
         double iCorrection;
@@ -141,8 +146,8 @@ public class RobotTemplate extends SimpleRobot
         while(isEnabled())
         {
             ultrasonicDistance = ultrasonicDistance();
-            cP = (distance - ultrasonicDistance)*kP;
-            power = 1.0*cP;
+            cP = (distance - ultrasonicDistance) * kP;
+            power = 1.0 * cP;
 
             pCorrection = (-gyro.getRate()) * GkP;
             iCorrection = (straightAngle - gyro.getAngle()) * GkI;
@@ -171,12 +176,13 @@ public class RobotTemplate extends SimpleRobot
             {
                 bothSet(power);
             }
-            if (Math.abs(ultrasonicDistance-distance) < 0.25) {
+            if(Math.abs(ultrasonicDistance - distance) < 0.25)
+            {
                 break;
             }
             bothSet(0);
         }
-        
+
     }
 
     public void leftSet(double lDp)
@@ -244,20 +250,82 @@ public class RobotTemplate extends SimpleRobot
         solenoidArm2.set(DoubleSolenoid.Value.kOff);
     }
 
-    public void expel() {
-        //kick out the ball
-        intake.set(-1);
-        lowerIntake();
-        intake.set(0);
-        raiseIntake();
+    public void expel()
+    {
+        if(ballPosition == 1)
+        {
+            //kick out the ball
+            intake.set(-1);
+            lowerIntake();
+            intake.set(0);
+            raiseIntake();
+        }
+        else
+        {
+            SmartDashboard.putString("Error Messages", "Ball not in shooter");
+        }
+
     }
-    
+
+    public void reload()
+    {
+        if(!(ballPosition == 1))
+        {
+            while(isEnabled() && !(limCatapult.get()))
+            {
+                catapult1.set(1);
+                catapult2.set(-1);
+            }
+            catapult1.set(0);
+            catapult2.set(0);
+        }
+        else
+        {
+            SmartDashboard.putString("Error Messages", "Ball in catapult");
+        }
+    }
+
     public void intake()
     {
-        lowerIntake();
-        intake.set(1);//could be reversed
-        raiseIntake();
-        intake.set(0);
+        if(ballPosition == 0)
+        {
+            lowerIntake();
+            intake.set(1);//could be reversed
+            raiseIntake();
+            intake.set(0);
+            ballPosition = 1;
+        }
+        else
+        {
+            SmartDashboard.putString("Error Messages", "Ball not outside robot");
+        }
+
+    }
+
+    public void slowExpel()
+    {
+        if(ballPosition == 2)
+        {
+            //stuffiness
+            ballPosition = 0;
+        }
+        else
+        {
+            SmartDashboard.putString("Error Messages", "Ball not in assist position");
+        }
+    }
+
+    public void slowIntake()
+    {
+        if(ballPosition == 0)
+        {
+            //stuffiness
+            ballPosition = 2;
+        }
+        else
+        {
+            SmartDashboard.putString("Error Messages", "Ball not outside robot");
+        }
     }
 
     public void robotInit()
@@ -266,13 +334,22 @@ public class RobotTemplate extends SimpleRobot
 
     public void fire()
     {
-        //do whatever the heck the shooter team made to make it shoot thingies at the other thingies
-        catapultFire.setDirection(Relay.Direction.kBoth/*change to what make it shoot things*/);
-        waitBrendan(1);//change to whatever it takes to fire
-        catapultFire.setDirection(Relay.Direction.kBoth/*change to make it whatever it stops shooting the thingies */);
-        solenoidShooter.set(DoubleSolenoid.Value.kReverse);
-        waitBrendan(1);
-        solenoidShooter.set(DoubleSolenoid.Value.kForward);
+        if(ballPosition == 1)
+        {
+            //do whatever the heck the shooter team made to make it shoot thingies at the other thingies
+            catapultFire.setDirection(Relay.Direction.kBoth/*change to what make it shoot things*/);
+            waitBrendan(1);//change to whatever it takes to fire
+            catapultFire.setDirection(Relay.Direction.kBoth/*change to make it whatever it stops shooting the thingies */);
+            solenoidShooter.set(DoubleSolenoid.Value.kReverse);
+            waitBrendan(1);
+            solenoidShooter.set(DoubleSolenoid.Value.kForward);
+            ballPosition = 0;
+            reload();
+        }
+        else
+        {
+            SmartDashboard.putString("Error Messages", "Ball not in catapult");
+        }
     }
 
     public void outputAccelData()
@@ -301,12 +378,12 @@ public class RobotTemplate extends SimpleRobot
         //wait.start();
         wait.delay(time);
         /*
-        while(wait.get() < time)
-        {
-            System.out.println("Party time!");
-            //Party Time !!!
-        }
-        * */
+         while(wait.get() < time)
+         {
+         System.out.println("Party time!");
+         //Party Time !!!
+         }
+         * */
     }
 
     public void disabled()
@@ -353,6 +430,12 @@ public class RobotTemplate extends SimpleRobot
         fire();
     }
 
+    public void computerAssistedFireLinear()
+    {
+        wallDistance(IDEAL_SHOOTING_DISTANCE);
+        fire();
+    }
+
     public void autonomous()
     {
         /*
@@ -360,7 +443,7 @@ public class RobotTemplate extends SimpleRobot
          solenoidShooter.set(DoubleSolenoid.Value.kForward);
          * */
         VisionThingy vision = new VisionThingy();
-        final double IDEAL_DISTANCE = IDEAL_SHOOTING_DISTANCE;
+        final double STARTING_DISTANCE = ultrasonicDistance();
         double[][] horizontalTargetLocations;
         double[][] verticalTargetLocations;
         if(stupidDriverStation.getDigitalIn(4))
@@ -368,44 +451,6 @@ public class RobotTemplate extends SimpleRobot
             System.out.println("Not doing anything");
             return;
         }
-        /*
-         if(stupidDriverStation.getDigitalIn(5)) {
-         superDrive(0.4, 0);
-         Timer heartbeat = new Timer();
-         heartbeat.start();
-         double ultrasonicDistance;
-         while(isAutonomous() && isEnabled()) {
-         compressorCheckThingy();
-         ultrasonicDistance = ultrasonicDistance();
-         SmartDashboard.putDouble("Heartbeat", heartbeat.get());
-         SmartDashboard.putDouble("Ultrasonic Distance", ultrasonicDistance);
-         heartbeat.reset();
-         heartbeat.start();
-         if(ultrasonicDistance >= IDEAL_DISTANCE && ultrasonicDistance <= IDEAL_DISTANCE+0.5)
-         {
-         superDrive(0,0);
-         System.out.println("I'm here!");
-         }
-         else if(ultrasonicDistance > IDEAL_DISTANCE+0.5)
-         {
-         superDrive(0.3, 0);
-         SmartDashboard.putString("Forward/Back", "Forward");
-         }
-         else if(ultrasonicDistance < IDEAL_DISTANCE)
-         {
-         superDrive(-0.3, 0);
-         SmartDashboard.putString("Forward/Back", "Backward");
-         }
-         else
-         {
-         System.out.println("Something is going wrong I don't know what happening aaaaaaaaaahhhhhhhhhhhh");
-         break;
-         }
-         }
-         bothSet(0);
-         System.out.println("Pew pew pew");
-         }
-         */
 
         //fire with pickup
         if(stupidDriverStation.getDigitalIn(2))
@@ -417,11 +462,15 @@ public class RobotTemplate extends SimpleRobot
                 verticalTargetLocations = vision.verticalTargetLocations();
                 Timer timer = new Timer();
 
-                computerAssistedFire();
-                intake();
+                wallDistance(IDEAL_SHOOTING_DISTANCE);
                 fire();
+                wallDistance(STARTING_DISTANCE);
+                intake();
+                computerAssistedFireLinear();
                 checkBattery();
+                break;
             }
+            //Party time!
         }
         //Fire without pickup
         if(stupidDriverStation.getDigitalIn(3))
@@ -432,23 +481,21 @@ public class RobotTemplate extends SimpleRobot
                 while(isAutonomous() && isEnabled())
                 {
                     compressorCheckThingy();
-                    horizontalTargetLocations = vision.horizontalTargetLocations();
-                    verticalTargetLocations = vision.verticalTargetLocations();
-                    computerAssistedFire();
+                    computerAssistedFireLinear();
                     checkBattery();
+                    break;
                 }
             }
             else
             {
-                
+
                 waitBrendan(5);
                 while(isAutonomous() && isEnabled())
                 {
                     compressorCheckThingy();
-                    horizontalTargetLocations = vision.horizontalTargetLocations();
-                    verticalTargetLocations = vision.verticalTargetLocations();
-                    computerAssistedFire();
+                    computerAssistedFireLinear();
                     checkBattery();
+                    break;
                 }
             }
 
@@ -465,15 +512,17 @@ public class RobotTemplate extends SimpleRobot
             while(isOperatorControl() && isEnabled())
             {
                 checkBattery();
+                compressorCheckThingy();
                 SmartDashboard.putDouble("Heartbeat", heartbeat.get());
                 heartbeat.reset();
                 //output data to SmartDashboard
                 SmartDashboard.putDouble("Throttle", -(throttle.getRawAxis(2)));
                 SmartDashboard.putDouble("swRot", swAdjust(steerWheel.getAxis(Joystick.AxisType.kX)));
                 SmartDashboard.putDouble("Ultrasonic Distance", ultrasonicDistance());
+
                 if(!stupidDriverStation.getDigitalIn(1))
                 {
-                    if(Button1.get() || Button2.get())
+                    if(Button1.get() || Button2.get() || throttle.getRawButton(1))
                     {
                         turnSet(swAdjust(steerWheel.getAxis(Joystick.AxisType.kX)));
                     }
@@ -484,29 +533,72 @@ public class RobotTemplate extends SimpleRobot
                 }
                 else
                 {
-                    leftSet(xbox.getRawAxis(2));
-                    rightSet(xbox.getRawAxis(5));
+                    leftSet(-extra.getRawAxis(2));
+                    rightSet(-throttle.getRawAxis(2));
                 }
-                
+
                 SmartDashboard.putDouble("Gyro", gyro.getAngle());
-                //intake
-                if(throttle.getRawButton(4) || xbox.getRawButton(4)) // Y on xbox
+                //Joystick controls: Moving/Firing
+                //
+                if(throttle.getRawButton(2))
                 {
-                    intake();
                 }
-                // firing using the trigger
-                if(throttle.getRawButton(3) || xbox.getRawButton(2)) // B on xbox
+                //manual fire
+                if(throttle.getRawButton(3))
                 {
                     fire();
                 }
-                //firing with computer help
-                if(throttle.getRawButton(2) || xbox.getRawButton(3)) // X on xbox
+                //computer assisted fire: normal to wall
+                if(throttle.getRawButton(4))
                 {
                     computerAssistedFire();
                 }
-                if(throttle.getRawButton(5) || xbox.getRawButton(1)) {
+                //computer assisted fire: assume normal to wall
+                if(throttle.getRawButton(5))
+                {
+                    computerAssistedFireLinear();
+                }
+
+                //xbox controller does: intake
+                //
+                if(xbox.getRawButton(1))
+                {
+                    //auto normal pickup
+                    intake();
+                }
+                if(xbox.getRawButton(2))
+                {
+                    //auto expel
                     expel();
                 }
+                if(xbox.getRawButton(3))
+                {
+                    //auto slow pickup
+                    slowIntake();
+                }
+                if(xbox.getRawButton(4))
+                {
+                    //auto slow expel
+                    slowExpel();
+                }
+                if(xbox.getRawAxis(3) < -0.1)
+                {
+                    //up
+                    intake1.set(Relay.Value.kForward);
+                    intake2.set(Relay.Value.kForward);
+                }
+                else if(xbox.getRawAxis(3) > 0.1)
+                {
+                    //down
+                    intake1.set(Relay.Value.kReverse);
+                    intake2.set(Relay.Value.kReverse);
+                }
+                else
+                {
+                    intake1.set(Relay.Value.kOff);
+                    intake2.set(Relay.Value.kOff);
+                }
+                intake.set(xbox.getRawAxis(5));
             }
         }
     }

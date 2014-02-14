@@ -43,9 +43,7 @@ public class RobotTemplate extends SimpleRobot
     Victor intake = new Victor(7);
     Victor catapult1 = new Victor(8);
     Victor catapult2 = new Victor(9);
-    Relay intake1 = new Relay(1);
-    Relay intake2 = new Relay(2);
-    Relay catapultFire = new Relay(3);
+    //Relay catapultFire = new Relay(3);
     DriverStation stupidDriverStation = DriverStation.getInstance();
     AnalogChannel ultrasonic = new AnalogChannel(3);
     JoystickButton Button1 = new JoystickButton(steerWheel, 1);
@@ -235,19 +233,23 @@ public class RobotTemplate extends SimpleRobot
         // motor on intake
         solenoidArm1.set(DoubleSolenoid.Value.kForward);
         solenoidArm2.set(DoubleSolenoid.Value.kForward);
-        waitBrendan(1);//change
-        solenoidArm1.set(DoubleSolenoid.Value.kOff);
-        solenoidArm2.set(DoubleSolenoid.Value.kOff);
-        // stop motor on intake?
+        /*
+         waitBrendan(1);//change
+         solenoidArm1.set(DoubleSolenoid.Value.kOff);
+         solenoidArm2.set(DoubleSolenoid.Value.kOff);
+         // stop motor on intake?
+         * */
     }
 
     public void raiseIntake()
     {
         solenoidArm1.set(DoubleSolenoid.Value.kReverse);
         solenoidArm2.set(DoubleSolenoid.Value.kReverse);
-        waitBrendan(1);//change 
-        solenoidArm1.set(DoubleSolenoid.Value.kOff);
-        solenoidArm2.set(DoubleSolenoid.Value.kOff);
+        /*
+         waitBrendan(time);//change 
+         solenoidArm1.set(DoubleSolenoid.Value.kOff);
+         solenoidArm2.set(DoubleSolenoid.Value.kOff);
+         * */
     }
 
     public void expel()
@@ -302,11 +304,14 @@ public class RobotTemplate extends SimpleRobot
 
     }
 
-    public void slowExpel()
+    public void assistExpel()
     {
         if(ballPosition == 2)
         {
             //stuffiness
+            intake.set(-1);
+            waitBrendan(1);
+            intake.set(0);
             ballPosition = 0;
         }
         else
@@ -315,11 +320,15 @@ public class RobotTemplate extends SimpleRobot
         }
     }
 
-    public void slowIntake()
+    public void assistIntake()
     {
         if(ballPosition == 0)
         {
-            //stuffiness
+            //stuffiness            
+            lowerIntake();
+            intake.set(0.4);//could be reversed
+            raiseIntake();
+            intake.set(0);
             ballPosition = 2;
         }
         else
@@ -337,12 +346,17 @@ public class RobotTemplate extends SimpleRobot
         if(ballPosition == 1)
         {
             //do whatever the heck the shooter team made to make it shoot thingies at the other thingies
-            catapultFire.setDirection(Relay.Direction.kBoth/*change to what make it shoot things*/);
-            waitBrendan(1);//change to whatever it takes to fire
-            catapultFire.setDirection(Relay.Direction.kBoth/*change to make it whatever it stops shooting the thingies */);
-            solenoidShooter.set(DoubleSolenoid.Value.kReverse);
-            waitBrendan(1);
             solenoidShooter.set(DoubleSolenoid.Value.kForward);
+            waitBrendan(1);
+            solenoidShooter.set(DoubleSolenoid.Value.kReverse);
+            waitBrendan(1);//change to whatever it takes to fire
+            //solenoidShooter.setDirection(Relay.Direction.kBoth/*change to make it whatever it stops shooting the thingies */);
+            /*
+            solendoidShooter.set(DoubleSolenoid.Value.kReverse);
+            waitBrendan(1);
+            solenoidShooter.set(Doub
+            * leSolenoid.Value.kForward);
+            */
             ballPosition = 0;
             reload();
         }
@@ -574,29 +588,32 @@ public class RobotTemplate extends SimpleRobot
                 if(xbox.getRawButton(3))
                 {
                     //auto slow pickup
-                    slowIntake();
+                    assistIntake();
                 }
                 if(xbox.getRawButton(4))
                 {
                     //auto slow expel
-                    slowExpel();
+                    assistExpel();
                 }
                 if(xbox.getRawAxis(3) < -0.1)
                 {
                     //up
-                    intake1.set(Relay.Value.kForward);
-                    intake2.set(Relay.Value.kForward);
+                    solenoidArm1.set(DoubleSolenoid.Value.kForward);
+                    solenoidArm2.set(DoubleSolenoid.Value.kForward);
                 }
                 else if(xbox.getRawAxis(3) > 0.1)
                 {
                     //down
-                    intake1.set(Relay.Value.kReverse);
-                    intake2.set(Relay.Value.kReverse);
+                    solenoidArm1.set(DoubleSolenoid.Value.kReverse);
+                    solenoidArm2.set(DoubleSolenoid.Value.kReverse);
+
                 }
                 else
                 {
+                    /*
                     intake1.set(Relay.Value.kOff);
                     intake2.set(Relay.Value.kOff);
+                    * */
                 }
                 intake.set(xbox.getRawAxis(5));
             }

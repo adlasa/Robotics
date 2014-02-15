@@ -4,9 +4,7 @@
 /* must be accompanied by the FIRST BSD license file in the root directory of */
 /* the project.                                                               */
 /*----------------------------------------------------------------------------*/
-
 package edu.wpi.first.wpilibj.templates;
-
 
 import edu.wpi.first.wpilibj.AnalogChannel;
 import edu.wpi.first.wpilibj.Compressor;
@@ -25,7 +23,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  * creating this project, you must also update the manifest file in the resource
  * directory.
  */
-public class RobotTemplate extends SimpleRobot {
+public class RobotTemplate extends SimpleRobot
+{
     /**
      * This function is called once each time the robot enters autonomous mode.
      */
@@ -52,22 +51,25 @@ public class RobotTemplate extends SimpleRobot {
     double autoTime;
     VisionThingy vision = new VisionThingy();
     double KP = .2;
-    
+
     public double ultrasonicDistance()
     {
         SmartDashboard.putDouble("Ultrasonic Voltage", ultrasonic.getVoltage());
         return ((ultrasonic.getVoltage()) * 3.47826087) - 0.25;
     }
+
     public void lowerIntake()
     {
         solenoidArm1.set(DoubleSolenoid.Value.kForward);
         solenoidArm2.set(DoubleSolenoid.Value.kForward);
     }
+
     public void raiseIntake()
     {
         solenoidArm1.set(DoubleSolenoid.Value.kReverse);
         solenoidArm2.set(DoubleSolenoid.Value.kReverse);
     }
+
     public void drive()
     {
         leftDrive1.set(leftStick.getRawAxis(1));
@@ -77,27 +79,33 @@ public class RobotTemplate extends SimpleRobot {
         rightDrive2.set(-rightStick.getRawAxis(1));
         rightDrive3.set(-rightStick.getRawAxis(1));
     }
+
     public void intake()
     {
         intake.set(xBox.getRawAxis(2));
-    }    
-    
-    public void charge(double distance){
+    }
+
+    public void charge(double distance)
+    {
         double stable = 0;
         double speed = 0;
-        while(true){
+        while(true)
+        {
             speed = KP * (distance - ultrasonicDistance());
             setSpeed(speed);
-            if(ultrasonicDistance()  > distance - .5 || ultrasonicDistance() < distance + .5){
+            if(ultrasonicDistance() > distance - .5 || ultrasonicDistance() < distance + .5)
+            {
                 stable++;
-                if(stable > 100){
+                if(stable > 100)
+                {
                     break;
                 }
             }
         }
     }
-    
-    public void setSpeed(double speed){
+
+    public void setSpeed(double speed)
+    {
         leftDrive1.set(speed);
         leftDrive2.set(speed);
         leftDrive3.set(speed);
@@ -105,58 +113,75 @@ public class RobotTemplate extends SimpleRobot {
         rightDrive2.set(-speed);
         rightDrive3.set(-speed);
     }
-    
-    
-    public void autonomous() {
+
+    public void autonomous()
+    {
         compressor.start();
         lowerIntake();
-        if(SmartDashboard.getBoolean("2 Ball Auto: ")){
-            intake.set(0.2);
-            Timer.delay(0.2);
-            intake.set(0);
+        if(SmartDashboard.getBoolean("2 Ball Auto: "))
+        {
+            solenoidShooter.set(DoubleSolenoid.Value.kReverse);
+            Timer.delay(1);
+            solenoidShooter.set(DoubleSolenoid.Value.kForward);
+            while(isAutonomous() && isEnabled())
+            {
+                windup();
+                if(!limCatapult.get())
+                {
+                    intake.set(0.5);
+                    Timer.delay(0.5);
+                    solenoidShooter.set(DoubleSolenoid.Value.kReverse);
+                    Timer.delay(1);
+                    solenoidShooter.set(DoubleSolenoid.Value.kForward);
+                    break;
+                }
+            }
+            while(isAutonomous() && isEnabled())
+            {
+                windup();
+            }
+            return;
         }
         autoMove.start();
-        charge(14);
-        while(isAutonomous() && isEnabled()){
-            if(vision.isHot){
+        //charge(14);
+        while(isAutonomous() && isEnabled())
+        {
+            if(vision.isHot)
+            {
                 solenoidShooter.set(DoubleSolenoid.Value.kReverse);
                 Timer.delay(1);
                 solenoidShooter.set(DoubleSolenoid.Value.kForward);
                 break;
             }
-            if(autoMove.get() > 5){
-                solenoidShooter.set(DoubleSolenoid.Value.kReverse);
-                Timer.delay(1);
-                solenoidShooter.set(DoubleSolenoid.Value.kForward);
-                break;
-            } 
-        }
-        while(isAutonomous() && isEnabled()){
-            windup();
-            if(SmartDashboard.getBoolean("2 Ball Auto: ") && !limCatapult.get()){
-                intake.set(0.2);
-                Timer.delay(0.5);
+            if(autoMove.get() > 5)
+            {
                 solenoidShooter.set(DoubleSolenoid.Value.kReverse);
                 Timer.delay(1);
                 solenoidShooter.set(DoubleSolenoid.Value.kForward);
                 break;
             }
         }
-        while(isAutonomous() && isEnabled()){
+        while(isAutonomous() && isEnabled())
+        {
             windup();
-        }   
+        }
     }
-    
-    public void fire(){
+
+    public void fire()
+    {
         solenoidShooter.set(DoubleSolenoid.Value.kReverse);
         shooterTimer.start();
     }
-    
-    public void windup(){
-        if(solenoidShooter.get() == DoubleSolenoid.Value.kForward && limCatapult.get()){
+
+    public void windup()
+    {
+        if(solenoidShooter.get() == DoubleSolenoid.Value.kForward && limCatapult.get())
+        {
             catapult1.set(0.5);
             catapult2.set(-0.5);
-        }else{
+        }
+        else
+        {
             catapult1.set(0);
             catapult2.set(0);
         }
@@ -165,15 +190,19 @@ public class RobotTemplate extends SimpleRobot {
     /**
      * This function is called once each time the robot enters operator control.
      */
-    public void operatorControl() {
+    public void operatorControl()
+    {
         compressor.start();
         autoMove.reset();
         autoMove.stop();
         while(isOperatorControl() && isEnabled())
         {
-            if(rightStick.getRawButton(1) && !limCatapult.get()){
+            if(rightStick.getRawButton(1) && !limCatapult.get())
+            {
                 fire();
-            }else if(shooterTimer.get() > 1){
+            }
+            else if(shooterTimer.get() > 1)
+            {
                 solenoidShooter.set(DoubleSolenoid.Value.kForward);
                 shooterTimer.reset();
                 shooterTimer.stop();
@@ -184,18 +213,19 @@ public class RobotTemplate extends SimpleRobot {
             if(xBox.getRawButton(5))
             {
                 lowerIntake();
-            }else if(xBox.getRawButton(6))
+            }
+            else if(xBox.getRawButton(6))
             {
                 raiseIntake();
             }
         }
         compressor.stop();
     }
-    
+
     /**
      * This function is called once each time the robot enters test mode.
      */
-    public void test() {
-    
+    public void test()
+    {
     }
 }

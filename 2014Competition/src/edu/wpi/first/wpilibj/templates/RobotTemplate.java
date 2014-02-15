@@ -186,17 +186,17 @@ public class RobotTemplate extends SimpleRobot
     public void leftSet(double lDp)
     {
         leftDrive1.set(lDp);
-        //leftDrive2.set(lDp);
-        //leftDrive3.set(lDp);
+        leftDrive2.set(lDp);
+        leftDrive3.set(lDp);
         SmartDashboard.putDouble("Left Drive Power", lDp);
     }
 
     public void rightSet(double rDp)
     {
         rightDrive1.set(-rDp);
-        //rightDrive2.set(-rDp);
-        //rightDrive3.set(-rDp);
-        SmartDashboard.putDouble("Left Drive Power", rDp);
+        rightDrive2.set(-rDp);
+        rightDrive3.set(-rDp);
+        SmartDashboard.putDouble("Right Drive Power", rDp);
     }
 
     public void bothSet(double bDp)
@@ -465,7 +465,6 @@ public class RobotTemplate extends SimpleRobot
             System.out.println("Not doing anything");
             return;
         }
-
         //fire with pickup
         if(stupidDriverStation.getDigitalIn(2))
         {
@@ -483,12 +482,12 @@ public class RobotTemplate extends SimpleRobot
                 computerAssistedFireLinear();
                 checkBattery();
                 break;
-            }
+            } 
             //Party time!
         }
         //Fire without pickup
         if(stupidDriverStation.getDigitalIn(3))
-        {
+        { 
             vision.mainVision();
             if(vision.isHot())
             {
@@ -499,7 +498,7 @@ public class RobotTemplate extends SimpleRobot
                     checkBattery();
                     break;
                 }
-            }
+            }     
             else
             {
 
@@ -512,7 +511,7 @@ public class RobotTemplate extends SimpleRobot
                     break;
                 }
             }
-
+ 
         }
     }
 
@@ -528,7 +527,7 @@ public class RobotTemplate extends SimpleRobot
                 checkBattery();
                 compressorCheckThingy();
                 SmartDashboard.putDouble("Heartbeat", heartbeat.get());
-                heartbeat.reset();
+                heartbeat.reset(); 
                 //output data to SmartDashboard
                 SmartDashboard.putDouble("Throttle", -(throttle.getRawAxis(2)));
                 SmartDashboard.putDouble("swRot", swAdjust(steerWheel.getAxis(Joystick.AxisType.kX)));
@@ -611,7 +610,7 @@ public class RobotTemplate extends SimpleRobot
                 else
                 {
                     /*
-                    intake1.set(Relay.Value.kOff);
+                    intakeintakeaaa.set(Relay.Value.kOff);
                     intake2.set(Relay.Value.kOff);
                     * */
                 }

@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj.AnalogChannel;
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.SimpleRobot;
 import edu.wpi.first.wpilibj.Timer;
@@ -38,8 +39,8 @@ public class RobotTemplate extends SimpleRobot
     Victor rightDrive2 = new Victor(5);
     Victor rightDrive3 = new Victor(6);
     Victor intake = new Victor(7);
-    Victor catapult1 = new Victor(8);
-    Victor catapult2 = new Victor(9);
+    Victor catapault1 = new Victor(8);
+    Victor catapault2 = new Victor(9);
     AnalogChannel ultrasonic = new AnalogChannel(3);
     DigitalInput limCatapult = new DigitalInput(3);
     DoubleSolenoid solenoidArm = new DoubleSolenoid(7, 1, 2);
@@ -49,6 +50,9 @@ public class RobotTemplate extends SimpleRobot
     Timer windupTimer = new Timer();
     Timer autoTime = new Timer();
     VisionThingy vision = new VisionThingy();
+    DriverStation driverStation = DriverStation.getInstance();
+    boolean emergencyStop = false;
+    Timer straightDriveTimer = new Timer();
     //double KP = .2;
 
     public double ultrasonicDistance()
@@ -69,52 +73,62 @@ public class RobotTemplate extends SimpleRobot
 
     public void drive()
     {
-        if(throttle.getRawButton(2)){
+        if(throttle.getRawButton(2))
+        {
             setLeftSpeed(wheel.getAxis(Joystick.AxisType.kX));
-            setRightSpeed(-wheel.getAxis(Joystick.AxisType.kX));
-        }else if(wheel.getAxis(Joystick.AxisType.kX) <= 0){
+            setRightSpeed(wheel.getAxis(Joystick.AxisType.kX));
+        }
+        else if(wheel.getAxis(Joystick.AxisType.kX) <= 0)
+        {
             setLeftSpeed(throttle.getRawAxis(1) + wheel.getAxis(Joystick.AxisType.kX));
             setRightSpeed(-throttle.getRawAxis(1));
-        }else{
+        }
+        else
+        {
             setRightSpeed(-(throttle.getRawAxis(1) - wheel.getAxis(Joystick.AxisType.kX)));
             setLeftSpeed(throttle.getRawAxis(1));
         }
-        
+    }
+
+    public void driveStraight()
+    {
+        setRightSpeed(-0.7);
+        setLeftSpeed(0.7);
     }
 
     public void intake()
     {
-        intake.set(xBox.getRawAxis(2)/2);
+        intake.set(xBox.getRawAxis(2) / 2);
     }
 
     /*public void charge(double distance)
-    {
-        double stable = 0;
-        double speed = 0;
-        while(true)
-        {
-            speed = KP * (distance - ultrasonicDistance());
-            setLeftSpeed(speed);
-            setRightSpeed(-speed);
-            if(ultrasonicDistance() > distance - .5 || ultrasonicDistance() < distance + .5)
-            {
-                stable++;
-                if(stable > 100)
-                {
-                    break;
-                }
-            }
-        }
-    }*/
-
+     {
+     double stable = 0;
+     double speed = 0;
+     while(true)
+     {
+     speed = KP * (distance - ultrasonicDistance());
+     setLeftSpeed(speed);
+     setRightSpeed(-speed);
+     if(ultrasonicDistance() > distance - .5 || ultrasonicDistance() < distance + .5)
+     {
+     stable++;
+     if(stable > 100)
+     {
+     break;
+     }
+     }
+     }
+     }*/
     public void setLeftSpeed(double speed)
     {
         leftDrive1.set(speed);
         leftDrive2.set(speed);
         leftDrive3.set(speed);
     }
-    
-    public void setRightSpeed(double speed){
+
+    public void setRightSpeed(double speed)
+    {
         rightDrive1.set(speed);
         rightDrive2.set(speed);
         rightDrive3.set(speed);
@@ -124,7 +138,10 @@ public class RobotTemplate extends SimpleRobot
     {
         compressor.start();
         lowerIntake();
-        if(SmartDashboard.getBoolean("2 Ball Auto: "))
+        intake.set(0.2);
+        Timer.delay(0.2);
+        intake.set(0);
+        if(driverStation.getDigitalIn(2))
         {
             solenoidShooter.set(DoubleSolenoid.Value.kReverse);
             Timer.delay(1);
@@ -145,31 +162,54 @@ public class RobotTemplate extends SimpleRobot
             while(isAutonomous() && isEnabled())
             {
                 windup();
+                straightDriveTimer.start();
+                if(straightDriveTimer.get() < 5)
+                {
+                    driveStraight();
+                }
+                else
+                {
+                    setRightSpeed(0);
+                    setLeftSpeed(0);
+                    straightDriveTimer.stop();
+                }
+                return;
             }
-            return;
-        }
-        autoTime.start();
-        //charge(14);
-        while(isAutonomous() && isEnabled())
-        {
-            if(vision.isHot)
+            autoTime.start();
+            //charge(14);
+            while(isAutonomous() && isEnabled())
             {
-                solenoidShooter.set(DoubleSolenoid.Value.kReverse);
-                Timer.delay(1);
-                solenoidShooter.set(DoubleSolenoid.Value.kForward);
-                break;
+                if(vision.isHot)
+                {
+                    solenoidShooter.set(DoubleSolenoid.Value.kReverse);
+                    Timer.delay(1);
+                    solenoidShooter.set(DoubleSolenoid.Value.kForward);
+                    break;
+                }
+                if(autoTime.get() > 5)
+                {
+                    solenoidShooter.set(DoubleSolenoid.Value.kReverse);
+                    Timer.delay(1);
+                    solenoidShooter.set(DoubleSolenoid.Value.kForward);
+                    break;
+                }
             }
-            if(autoTime.get() > 5)
+            while(isAutonomous() && isEnabled())
             {
-                solenoidShooter.set(DoubleSolenoid.Value.kReverse);
-                Timer.delay(1);
-                solenoidShooter.set(DoubleSolenoid.Value.kForward);
-                break;
+                windup();
+                straightDriveTimer.start();
+                if(straightDriveTimer.get() < 5)
+                {
+                    driveStraight();
+                }
+                else
+                {
+                    setRightSpeed(0);
+                    setLeftSpeed(0);
+                    straightDriveTimer.stop();
+                }
             }
-        }
-        while(isAutonomous() && isEnabled())
-        {
-            windup();
+            straightDriveTimer.stop();
         }
     }
 
@@ -184,16 +224,17 @@ public class RobotTemplate extends SimpleRobot
         if(solenoidShooter.get() == DoubleSolenoid.Value.kForward && limCatapult.get())
         {
             windupTimer.start();
-            catapult1.set(windupTimer.get()/2);
-            catapult2.set(-(windupTimer.get())/2);
-            if(windupTimer.get() > 2){
+            catapault1.set(windupTimer.get() / 2);
+            catapault2.set(-(windupTimer.get()) / 2);
+            if(windupTimer.get() > 2)
+            {
                 windupTimer.stop();
             }
         }
         else
         {
-            catapult1.set(0);
-            catapult2.set(0);
+            catapault1.set(0);
+            catapault2.set(0);
             windupTimer.reset();
             windupTimer.stop();
         }
@@ -209,7 +250,7 @@ public class RobotTemplate extends SimpleRobot
         autoTime.stop();
         while(isOperatorControl() && isEnabled())
         {
-            if(throttle.getRawButton(1) && !limCatapult.get())
+            if(throttle.getRawButton(1))
             {
                 fire();
             }
@@ -219,9 +260,24 @@ public class RobotTemplate extends SimpleRobot
                 shooterTimer.reset();
                 shooterTimer.stop();
             }
-            windup();
+            if(!emergencyStop)
+            {
+                windup();
+            }
             drive();
             intake();
+            if(xBox.getRawButton(2))
+            {
+                emergencyStop = true;
+                catapault1.set(0);
+                catapault2.set(0);
+                windupTimer.reset();
+                windupTimer.stop();
+            }
+            else if(xBox.getRawButton(1))
+            {
+                emergencyStop = false;
+            }
             if(xBox.getRawButton(5))
             {
                 lowerIntake();

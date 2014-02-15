@@ -28,8 +28,8 @@ public class RobotTemplate extends SimpleRobot
     /**
      * This function is called once each time the robot enters autonomous mode.
      */
-    Joystick leftStick = new Joystick(1);
-    Joystick rightStick = new Joystick(2);
+    Joystick wheel = new Joystick(1);
+    Joystick throttle = new Joystick(2);
     Joystick xBox = new Joystick(3);
     Victor leftDrive1 = new Victor(1);
     Victor leftDrive2 = new Victor(2);
@@ -46,10 +46,10 @@ public class RobotTemplate extends SimpleRobot
     DoubleSolenoid solenoidShooter = new DoubleSolenoid(7, 5, 6);
     Compressor compressor = new Compressor(1, 1);
     Timer shooterTimer = new Timer();
-    Timer autoMove = new Timer();
-    double autoTime;
+    Timer windupTimer = new Timer();
+    Timer autoTime = new Timer();
     VisionThingy vision = new VisionThingy();
-    double KP = .2;
+    //double KP = .2;
 
     public double ultrasonicDistance()
     {
@@ -69,27 +69,33 @@ public class RobotTemplate extends SimpleRobot
 
     public void drive()
     {
-        leftDrive1.set(leftStick.getRawAxis(1));
-        leftDrive2.set(leftStick.getRawAxis(1));
-        leftDrive3.set(leftStick.getRawAxis(1));
-        rightDrive1.set(-rightStick.getRawAxis(1));
-        rightDrive2.set(-rightStick.getRawAxis(1));
-        rightDrive3.set(-rightStick.getRawAxis(1));
+        if(throttle.getRawButton(2)){
+            setLeftSpeed(wheel.getAxis(Joystick.AxisType.kX));
+            setRightSpeed(-wheel.getAxis(Joystick.AxisType.kX));
+        }else if(wheel.getAxis(Joystick.AxisType.kX) <= 0){
+            setLeftSpeed(throttle.getRawAxis(1) + wheel.getAxis(Joystick.AxisType.kX));
+            setRightSpeed(-throttle.getRawAxis(1));
+        }else{
+            setRightSpeed(-(throttle.getRawAxis(1) - wheel.getAxis(Joystick.AxisType.kX)));
+            setLeftSpeed(throttle.getRawAxis(1));
+        }
+        
     }
 
     public void intake()
     {
-        intake.set(xBox.getRawAxis(2));
+        intake.set(xBox.getRawAxis(2)/2);
     }
 
-    public void charge(double distance)
+    /*public void charge(double distance)
     {
         double stable = 0;
         double speed = 0;
         while(true)
         {
             speed = KP * (distance - ultrasonicDistance());
-            setSpeed(speed);
+            setLeftSpeed(speed);
+            setRightSpeed(-speed);
             if(ultrasonicDistance() > distance - .5 || ultrasonicDistance() < distance + .5)
             {
                 stable++;
@@ -99,16 +105,19 @@ public class RobotTemplate extends SimpleRobot
                 }
             }
         }
-    }
+    }*/
 
-    public void setSpeed(double speed)
+    public void setLeftSpeed(double speed)
     {
         leftDrive1.set(speed);
         leftDrive2.set(speed);
         leftDrive3.set(speed);
-        rightDrive1.set(-speed);
-        rightDrive2.set(-speed);
-        rightDrive3.set(-speed);
+    }
+    
+    public void setRightSpeed(double speed){
+        rightDrive1.set(speed);
+        rightDrive2.set(speed);
+        rightDrive3.set(speed);
     }
 
     public void autonomous()
@@ -139,7 +148,7 @@ public class RobotTemplate extends SimpleRobot
             }
             return;
         }
-        autoMove.start();
+        autoTime.start();
         //charge(14);
         while(isAutonomous() && isEnabled())
         {
@@ -150,7 +159,7 @@ public class RobotTemplate extends SimpleRobot
                 solenoidShooter.set(DoubleSolenoid.Value.kForward);
                 break;
             }
-            if(autoMove.get() > 5)
+            if(autoTime.get() > 5)
             {
                 solenoidShooter.set(DoubleSolenoid.Value.kReverse);
                 Timer.delay(1);
@@ -174,13 +183,19 @@ public class RobotTemplate extends SimpleRobot
     {
         if(solenoidShooter.get() == DoubleSolenoid.Value.kForward && limCatapult.get())
         {
-            catapult1.set(0.5);
-            catapult2.set(-0.5);
+            windupTimer.start();
+            catapult1.set(windupTimer.get()/2);
+            catapult2.set(-(windupTimer.get())/2);
+            if(windupTimer.get() > 2){
+                windupTimer.stop();
+            }
         }
         else
         {
             catapult1.set(0);
             catapult2.set(0);
+            windupTimer.reset();
+            windupTimer.stop();
         }
     }
 
@@ -190,11 +205,11 @@ public class RobotTemplate extends SimpleRobot
     public void operatorControl()
     {
         compressor.start();
-        autoMove.reset();
-        autoMove.stop();
+        autoTime.reset();
+        autoTime.stop();
         while(isOperatorControl() && isEnabled())
         {
-            if(rightStick.getRawButton(1) && !limCatapult.get())
+            if(throttle.getRawButton(1) && !limCatapult.get())
             {
                 fire();
             }

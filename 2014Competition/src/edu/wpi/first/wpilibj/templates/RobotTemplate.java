@@ -28,6 +28,7 @@ public class RobotTemplate extends SimpleRobot
     public final int SOLENOID_MODULE_SLOT = 1;
     public final double MAX_MOTOR_POWER_FOR_COMPRESSION = 3;
     public final double IDEAL_SHOOTING_DISTANCE = 14;
+    
     //uses 1 & 2
     Gyro gyro = new Gyro(ANALOG_MODULE_SLOT, 1);
     Joystick steerWheel = new Joystick(1);
@@ -58,9 +59,11 @@ public class RobotTemplate extends SimpleRobot
     ADXL345_I2C accel = new ADXL345_I2C(DIGITAL_MODULE_SLOT, ADXL345_I2C.DataFormat_Range.k2G);
     ADXL345_I2C.AllAxes axes = new ADXL345_I2C.AllAxes();
     Timer time = new Timer();
+    Timer fixingStuff = new Timer();
     double acceleration;
     double velocity = 0;
     double distance;
+    boolean fireFinish = false;
     //0 = outside robot, 1 = in shooter, 2 = in assist position
     int ballPosition = 1;
     //using MaxBotix HRLV-EZ4
@@ -343,22 +346,33 @@ public class RobotTemplate extends SimpleRobot
 
     public void fire()
     {
+        fireFinish = true;
         if(ballPosition == 1)
         {
             //do whatever the heck the shooter team made to make it shoot thingies at the other thingies
+            //Dominik fixed your stupid code and is a programming God
+            
             solenoidShooter.set(DoubleSolenoid.Value.kForward);
-            waitBrendan(1);
-            solenoidShooter.set(DoubleSolenoid.Value.kReverse);
-            waitBrendan(1);//change to whatever it takes to fire
-            //solenoidShooter.setDirection(Relay.Direction.kBoth/*change to make it whatever it stops shooting the thingies */);
-            /*
-            solendoidShooter.set(DoubleSolenoid.Value.kReverse);
-            waitBrendan(1);
-            solenoidShooter.set(Doub
-            * leSolenoid.Value.kForward);
-            */
-            ballPosition = 0;
-            reload();
+            fixingStuff.start();
+            if (fixingStuff.get() > 1)
+            {
+                solenoidShooter.set(DoubleSolenoid.Value.kReverse);
+                if (fixingStuff.get() > 2)
+                {//change to whatever it takes to fire
+                //solenoidShooter.setDirection(Relay.Direction.kBoth/*change to make it whatever it stops shooting the thingies */);
+                /*
+                solendoidShooter.set(DoubleSolenoid.Value.kReverse);
+                waitBrendan(1);
+                solenoidShooter.set(Doub
+                * leSolenoid.Value.kForward);
+                */
+                ballPosition = 0;
+                reload();
+                fireFinish = false;
+                fixingStuff.stop();
+                fixingStuff.reset();
+            }
+           }     
         }
         else
         {
@@ -526,6 +540,10 @@ public class RobotTemplate extends SimpleRobot
             {
                 checkBattery();
                 compressorCheckThingy();
+                if (fireFinish)
+                {
+                    fire();
+                }
                 SmartDashboard.putDouble("Heartbeat", heartbeat.get());
                 heartbeat.reset(); 
                 //output data to SmartDashboard

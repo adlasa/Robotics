@@ -42,8 +42,7 @@ public class RobotTemplate extends SimpleRobot
     Victor catapult2 = new Victor(9);
     AnalogChannel ultrasonic = new AnalogChannel(3);
     DigitalInput limCatapult = new DigitalInput(3);
-    DoubleSolenoid solenoidArm1 = new DoubleSolenoid(7, 1, 2);
-    DoubleSolenoid solenoidArm2 = new DoubleSolenoid(7, 3, 4);
+    DoubleSolenoid solenoidArm = new DoubleSolenoid(7, 1, 2);
     DoubleSolenoid solenoidShooter = new DoubleSolenoid(7, 5, 6);
     Compressor compressor = new Compressor(1, 1);
     Timer shooterTimer = new Timer();
@@ -60,14 +59,12 @@ public class RobotTemplate extends SimpleRobot
 
     public void lowerIntake()
     {
-        solenoidArm1.set(DoubleSolenoid.Value.kForward);
-        solenoidArm2.set(DoubleSolenoid.Value.kForward);
+        solenoidArm.set(DoubleSolenoid.Value.kForward);
     }
 
     public void raiseIntake()
     {
-        solenoidArm1.set(DoubleSolenoid.Value.kReverse);
-        solenoidArm2.set(DoubleSolenoid.Value.kReverse);
+        solenoidArm.set(DoubleSolenoid.Value.kReverse);
     }
 
     public void drive()

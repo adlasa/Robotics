@@ -28,7 +28,6 @@ public class RobotTemplate extends SimpleRobot
     public final int SOLENOID_MODULE_SLOT = 1;
     public final double MAX_MOTOR_POWER_FOR_COMPRESSION = 3;
     public final double IDEAL_SHOOTING_DISTANCE = 14;
-    
     //uses 1 & 2
     Gyro gyro = new Gyro(ANALOG_MODULE_SLOT, 1);
     Joystick steerWheel = new Joystick(1);
@@ -63,9 +62,11 @@ public class RobotTemplate extends SimpleRobot
     double acceleration;
     double velocity = 0;
     double distance;
-    boolean fireFinish = false;
     //0 = outside robot, 1 = in shooter, 2 = in assist position
     int ballPosition = 1;
+    
+    boolean catapultReady;
+    
     //using MaxBotix HRLV-EZ4
 
     public double ultrasonicDistance()
@@ -272,22 +273,30 @@ public class RobotTemplate extends SimpleRobot
 
     }
 
-    public void reload()
+    public boolean reload()
     {
         if(!(ballPosition == 1))
         {
-            while(isEnabled() && !(limCatapult.get()))
+            if(!limCatapult.get())
             {
                 catapult1.set(1);
                 catapult2.set(-1);
+                return false;
             }
-            catapult1.set(0);
-            catapult2.set(0);
+            else
+            {
+                catapult1.set(0);
+                catapult2.set(0);
+                ballPosition = 1;
+                return true;
+            }
         }
         else
         {
             SmartDashboard.putString("Error Messages", "Ball in catapult");
+            return true;
         }
+
     }
 
     public void intake()
@@ -346,33 +355,13 @@ public class RobotTemplate extends SimpleRobot
 
     public void fire()
     {
-        fireFinish = true;
         if(ballPosition == 1)
         {
             //do whatever the heck the shooter team made to make it shoot thingies at the other thingies
-            //Dominik fixed your stupid code and is a programming God
-            
             solenoidShooter.set(DoubleSolenoid.Value.kForward);
-            fixingStuff.start();
-            if (fixingStuff.get() > 1)
-            {
-                solenoidShooter.set(DoubleSolenoid.Value.kReverse);
-                if (fixingStuff.get() > 2)
-                {//change to whatever it takes to fire
-                //solenoidShooter.setDirection(Relay.Direction.kBoth/*change to make it whatever it stops shooting the thingies */);
-                /*
-                solendoidShooter.set(DoubleSolenoid.Value.kReverse);
-                waitBrendan(1);
-                solenoidShooter.set(Doub
-                * leSolenoid.Value.kForward);
-                */
-                ballPosition = 0;
-                reload();
-                fireFinish = false;
-                fixingStuff.stop();
-                fixingStuff.reset();
-            }
-           }     
+            waitBrendan(1);
+            solenoidShooter.set(DoubleSolenoid.Value.kReverse);
+            catapultReady = false;
         }
         else
         {
@@ -496,12 +485,12 @@ public class RobotTemplate extends SimpleRobot
                 computerAssistedFireLinear();
                 checkBattery();
                 break;
-            } 
+            }
             //Party time!
         }
         //Fire without pickup
         if(stupidDriverStation.getDigitalIn(3))
-        { 
+        {
             vision.mainVision();
             if(vision.isHot())
             {
@@ -512,7 +501,7 @@ public class RobotTemplate extends SimpleRobot
                     checkBattery();
                     break;
                 }
-            }     
+            }
             else
             {
 
@@ -525,7 +514,7 @@ public class RobotTemplate extends SimpleRobot
                     break;
                 }
             }
- 
+
         }
     }
 
@@ -533,6 +522,7 @@ public class RobotTemplate extends SimpleRobot
     {
         //declare array for holding motor powers
         Timer heartbeat = new Timer();
+        catapultReady = false;
         heartbeat.start();
         //main loop
         {
@@ -540,12 +530,8 @@ public class RobotTemplate extends SimpleRobot
             {
                 checkBattery();
                 compressorCheckThingy();
-                if (fireFinish)
-                {
-                    fire();
-                }
                 SmartDashboard.putDouble("Heartbeat", heartbeat.get());
-                heartbeat.reset(); 
+                heartbeat.reset();
                 //output data to SmartDashboard
                 SmartDashboard.putDouble("Throttle", -(throttle.getRawAxis(2)));
                 SmartDashboard.putDouble("swRot", swAdjust(steerWheel.getAxis(Joystick.AxisType.kX)));
@@ -628,11 +614,15 @@ public class RobotTemplate extends SimpleRobot
                 else
                 {
                     /*
-                    intakeintakeaaa.set(Relay.Value.kOff);
-                    intake2.set(Relay.Value.kOff);
-                    * */
+                     intakeintakeaaa.set(Relay.Value.kOff);
+                     intake2.set(Relay.Value.kOff);
+                     * */
                 }
                 intake.set(xbox.getRawAxis(5));
+                if(catapultReady == false)
+                {
+                    catapultReady = reload();
+                }
             }
         }
     }

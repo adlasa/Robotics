@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.SimpleRobot;
+import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.Victor;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -43,8 +44,9 @@ public class RobotTemplate extends SimpleRobot
     Victor catapault2 = new Victor(9);
     AnalogChannel ultrasonic = new AnalogChannel(3);
     DigitalInput limCatapult = new DigitalInput(3);
-    DoubleSolenoid solenoidArm = new DoubleSolenoid(7, 1, 2);
-    DoubleSolenoid solenoidShooter = new DoubleSolenoid(7, 5, 6);
+    Solenoid cameraLight = new Solenoid(3, 3);
+    DoubleSolenoid solenoidArm = new DoubleSolenoid(3, 1, 2);
+    DoubleSolenoid solenoidShooter = new DoubleSolenoid(3, 5, 6);
     Compressor compressor = new Compressor(1, 1);
     Timer shooterTimer = new Timer();
     Timer windupTimer = new Timer();
@@ -136,6 +138,7 @@ public class RobotTemplate extends SimpleRobot
 
     public void autonomous()
     {
+        cameraLight.set(true);
         compressor.start();
         lowerIntake();
         intake.set(0.2);
@@ -245,6 +248,7 @@ public class RobotTemplate extends SimpleRobot
      */
     public void operatorControl()
     {
+        cameraLight.set(true);
         compressor.start();
         autoTime.reset();
         autoTime.stop();

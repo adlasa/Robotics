@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj.Gyro;
 import edu.wpi.first.wpilibj.SimpleRobot;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Relay;
+import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.Victor;
 import edu.wpi.first.wpilibj.buttons.JoystickButton;
@@ -52,8 +53,9 @@ public class RobotTemplate extends SimpleRobot
     DigitalInput limCatapult = new DigitalInput(3);
     final int AREA_MINIMUM = 150;
     Compressor compressor1 = new Compressor(1, 1);
-    DoubleSolenoid solenoidArm1 = new DoubleSolenoid(7, 1, 2);
-    DoubleSolenoid solenoidArm2 = new DoubleSolenoid(7, 3, 4);
+    Solenoid cameraLight = new Solenoid(3, 3);
+    DoubleSolenoid solenoidArm1 = new DoubleSolenoid(3, 1, 2);
+    DoubleSolenoid solenoidArm2 = new DoubleSolenoid(3, 3, 4);
     DoubleSolenoid solenoidShooter = new DoubleSolenoid(7, 5, 6);
     ADXL345_I2C accel = new ADXL345_I2C(DIGITAL_MODULE_SLOT, ADXL345_I2C.DataFormat_Range.k2G);
     ADXL345_I2C.AllAxes axes = new ADXL345_I2C.AllAxes();
@@ -459,6 +461,7 @@ public class RobotTemplate extends SimpleRobot
          compressor1.start();
          solenoidShooter.set(DoubleSolenoid.Value.kForward);
          * */
+        cameraLight.set(true);
         VisionThingy vision = new VisionThingy();
         final double STARTING_DISTANCE = ultrasonicDistance();
         double[][] horizontalTargetLocations;
@@ -521,6 +524,7 @@ public class RobotTemplate extends SimpleRobot
     public void operatorControl()
     {
         //declare array for holding motor powers
+        cameraLight.set(true);
         Timer heartbeat = new Timer();
         catapultReady = false;
         heartbeat.start();

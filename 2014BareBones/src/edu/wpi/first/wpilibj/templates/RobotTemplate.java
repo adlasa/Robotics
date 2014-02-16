@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Gyro;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.SimpleRobot;
 import edu.wpi.first.wpilibj.Solenoid;
@@ -42,6 +43,7 @@ public class RobotTemplate extends SimpleRobot
     Victor intake = new Victor(7);
     Victor catapault1 = new Victor(8);
     Victor catapault2 = new Victor(9);
+    Gyro gyro = new Gyro(1, 1);
     AnalogChannel ultrasonic = new AnalogChannel(3);
     DigitalInput limCatapult = new DigitalInput(3);
     Solenoid cameraLight = new Solenoid(3, 3);
@@ -56,6 +58,11 @@ public class RobotTemplate extends SimpleRobot
     boolean emergencyStop = false;
     Timer straightDriveTimer = new Timer();
     //double KP = .2;
+
+    public void gyroDashboard()
+    {
+        SmartDashboard.putDouble("Gyro's output: ", gyro.getAngle());
+    }
 
     public double ultrasonicDistance()
     {
@@ -96,6 +103,18 @@ public class RobotTemplate extends SimpleRobot
     {
         setRightSpeed(-0.7);
         setLeftSpeed(0.7);
+    }
+    
+    public void checkBattery()
+    {
+        if(driverStation.getBatteryVoltage() < 11.5)
+        {
+            SmartDashboard.putBoolean("Replace Battery NOW", true);
+        }
+        else
+        {
+            SmartDashboard.putBoolean("Replace Battery NOW", false);
+        }
     }
 
     public void intake()
@@ -254,6 +273,7 @@ public class RobotTemplate extends SimpleRobot
         autoTime.stop();
         while(isOperatorControl() && isEnabled())
         {
+            gyroDashboard();
             if(throttle.getRawButton(1))
             {
                 fire();

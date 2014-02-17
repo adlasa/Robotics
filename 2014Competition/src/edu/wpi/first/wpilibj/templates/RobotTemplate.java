@@ -24,9 +24,9 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class RobotTemplate extends SimpleRobot
 {
-    public final int DIGITAL_MODULE_SLOT = 1;
+    public final int DIGITAL_MODULE_SLOT = 6;
     public final int ANALOG_MODULE_SLOT = 1;
-    public final int SOLENOID_MODULE_SLOT = 1;
+    public final int SOLENOID_MODULE_SLOT = 7;
     public final double MAX_MOTOR_POWER_FOR_COMPRESSION = 3;
     public final double IDEAL_SHOOTING_DISTANCE = 14;
     //uses 1 & 2
@@ -35,15 +35,15 @@ public class RobotTemplate extends SimpleRobot
     Joystick throttle = new Joystick(2);
     Joystick xbox = new Joystick(3);
     Joystick extra = new Joystick(4);
-    Victor leftDrive1 = new Victor(1);
-    Victor leftDrive2 = new Victor(2);
-    Victor leftDrive3 = new Victor(3);
-    Victor rightDrive1 = new Victor(4);
-    Victor rightDrive2 = new Victor(5);
-    Victor rightDrive3 = new Victor(6);
-    Victor intake = new Victor(7);
-    Victor catapult1 = new Victor(8);
-    Victor catapult2 = new Victor(9);
+    Victor leftDrive1 = new Victor(DIGITAL_MODULE_SLOT,1);
+    Victor leftDrive2 = new Victor(DIGITAL_MODULE_SLOT,2);
+    Victor leftDrive3 = new Victor(DIGITAL_MODULE_SLOT,3);
+    Victor rightDrive1 = new Victor(DIGITAL_MODULE_SLOT,4);
+    Victor rightDrive2 = new Victor(DIGITAL_MODULE_SLOT,5);
+    Victor rightDrive3 = new Victor(DIGITAL_MODULE_SLOT,6);
+    Victor intake = new Victor(DIGITAL_MODULE_SLOT,7);
+    Victor catapult1 = new Victor(DIGITAL_MODULE_SLOT,8);
+    Victor catapult2 = new Victor(DIGITAL_MODULE_SLOT,9);
     //Relay catapultFire = new Relay(3);
     DriverStation stupidDriverStation = DriverStation.getInstance();
     AnalogChannel ultrasonic = new AnalogChannel(3);
@@ -53,19 +53,21 @@ public class RobotTemplate extends SimpleRobot
     DigitalInput limCatapult = new DigitalInput(3);
     final int AREA_MINIMUM = 150;
     Compressor compressor1 = new Compressor(1, 1);
-    Solenoid cameraLight = new Solenoid(3, 3);
-    DoubleSolenoid solenoidArm1 = new DoubleSolenoid(3, 1, 2);
-    DoubleSolenoid solenoidArm2 = new DoubleSolenoid(3, 3, 4);
-    DoubleSolenoid solenoidShooter = new DoubleSolenoid(7, 5, 6);
+    Solenoid cameraLight = new Solenoid(SOLENOID_MODULE_SLOT, 3);
+    
+    DoubleSolenoid solenoidShooter = new DoubleSolenoid(SOLENOID_MODULE_SLOT, 5, 6);
+    
+    DoubleSolenoid solenoidIntakeArm = new DoubleSolenoid(SOLENOID_MODULE_SLOT, 1, 2);
+    
     ADXL345_I2C accel = new ADXL345_I2C(DIGITAL_MODULE_SLOT, ADXL345_I2C.DataFormat_Range.k2G);
     ADXL345_I2C.AllAxes axes = new ADXL345_I2C.AllAxes();
     Timer time = new Timer();
-    Timer fixingStuff = new Timer();
-    double acceleration;
-    double velocity = 0;
-    double distance;
+    //double acceleration;
+    //double velocity = 0;
+    //double distance;
+    
     //0 = outside robot, 1 = in shooter, 2 = in assist position
-    int ballPosition = 1;
+    int ballPosition = 0;
     
     boolean catapultReady;
     
@@ -168,17 +170,17 @@ public class RobotTemplate extends SimpleRobot
             }
             if(totalCorrection < 0)
             {
-                leftSet(power * (1 - Math.abs(totalCorrection)));
-                rightSet(power);
+                leftSet(-power * (1 - Math.abs(totalCorrection)));
+                rightSet(-power);
             }
             else if(totalCorrection > 0)
             {
-                leftSet(power);
-                rightSet(power * (1 - Math.abs(totalCorrection)));
+                leftSet(-power);
+                rightSet(-power * (1 - Math.abs(totalCorrection)));
             }
             else
             {
-                bothSet(power);
+                bothSet(-power);
             }
             if(Math.abs(ultrasonicDistance - distance) < 0.25)
             {
@@ -237,8 +239,7 @@ public class RobotTemplate extends SimpleRobot
     public void lowerIntake()
     {
         // motor on intake
-        solenoidArm1.set(DoubleSolenoid.Value.kForward);
-        solenoidArm2.set(DoubleSolenoid.Value.kForward);
+        solenoidIntakeArm.set(DoubleSolenoid.Value.kForward);
         /*
          waitBrendan(1);//change
          solenoidArm1.set(DoubleSolenoid.Value.kOff);
@@ -249,8 +250,7 @@ public class RobotTemplate extends SimpleRobot
 
     public void raiseIntake()
     {
-        solenoidArm1.set(DoubleSolenoid.Value.kReverse);
-        solenoidArm2.set(DoubleSolenoid.Value.kReverse);
+        solenoidIntakeArm.set(DoubleSolenoid.Value.kReverse);
         /*
          waitBrendan(time);//change 
          solenoidArm1.set(DoubleSolenoid.Value.kOff);
@@ -279,10 +279,10 @@ public class RobotTemplate extends SimpleRobot
     {
         if(!(ballPosition == 1))
         {
-            if(!limCatapult.get())
+            if(limCatapult.get())
             {
                 catapult1.set(1);
-                catapult2.set(-1);
+                catapult2.set(1);
                 return false;
             }
             else
@@ -353,6 +353,7 @@ public class RobotTemplate extends SimpleRobot
 
     public void robotInit()
     {
+        System.out.println("Electrical peoples are slow");
     }
 
     public void fire()
@@ -416,14 +417,14 @@ public class RobotTemplate extends SimpleRobot
 
     public void computerAssistedFire()
     {
-        distance = ultrasonicDistance();
+        double distance = ultrasonicDistance();
         turnSet(1);
         waitBrendan(0.1);
         bothSet(0);
 
         if(ultrasonicDistance() > distance)
         {
-            turnSet(-0.4);
+            turnSet(0.4);
             while(isEnabled())
             {
                 if(ultrasonicDistance() > distance)
@@ -435,7 +436,7 @@ public class RobotTemplate extends SimpleRobot
         }
         else
         {
-            turnSet(0.4);
+            turnSet(-0.4);
             while(isEnabled())
             {
                 if(ultrasonicDistance() > distance)
@@ -494,6 +495,8 @@ public class RobotTemplate extends SimpleRobot
         //Fire without pickup
         if(stupidDriverStation.getDigitalIn(3))
         {
+            //assumes ball is in robot at start
+            ballPosition = 1;
             vision.mainVision();
             if(vision.isHot())
             {
@@ -519,12 +522,13 @@ public class RobotTemplate extends SimpleRobot
             }
 
         }
+        cameraLight.set(false);
     }
 
     public void operatorControl()
     {
-        //declare array for holding motor powers
-        cameraLight.set(true);
+        
+        //cameraLight.set(true);
         Timer heartbeat = new Timer();
         catapultReady = false;
         heartbeat.start();
@@ -605,14 +609,12 @@ public class RobotTemplate extends SimpleRobot
                 if(xbox.getRawAxis(3) < -0.1)
                 {
                     //up
-                    solenoidArm1.set(DoubleSolenoid.Value.kForward);
-                    solenoidArm2.set(DoubleSolenoid.Value.kForward);
+                    solenoidIntakeArm.set(DoubleSolenoid.Value.kForward);
                 }
                 else if(xbox.getRawAxis(3) > 0.1)
                 {
                     //down
-                    solenoidArm1.set(DoubleSolenoid.Value.kReverse);
-                    solenoidArm2.set(DoubleSolenoid.Value.kReverse);
+                    solenoidIntakeArm.set(DoubleSolenoid.Value.kReverse);
 
                 }
                 else
@@ -631,9 +633,6 @@ public class RobotTemplate extends SimpleRobot
         }
     }
 
-    /**
-     * This function is called once each time the robot enters test mode.
-     */
     public void test()
     {
         while(isTest() && isEnabled())

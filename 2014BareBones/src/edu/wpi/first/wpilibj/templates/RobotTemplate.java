@@ -243,7 +243,7 @@ public class RobotTemplate extends SimpleRobot
 
      public void windup()
      {
-     if(solenoidShooter.get() == DoubleSolenoid.Value.kForward && limCatapult.get())
+     if((solenoidShooter.get() == DoubleSolenoid.Value.kForward) && limCatapult.get())
      {
      windupTimer.start();
      catapault1.set(windupTimer.get() / 2);

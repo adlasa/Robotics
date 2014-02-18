@@ -99,7 +99,7 @@ public class RobotTemplate extends SimpleRobot
         }
     }*/
     public void drive(){
-        setLeftSpeed(xBox.getRawAxis(1));
+        setLeftSpeed(xBox.getRawAxis(2));
         setRightSpeed(-xBox.getRawAxis(5));
     }
 

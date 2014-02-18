@@ -31,9 +31,9 @@ public class RobotTemplate extends SimpleRobot
     /**
      * This function is called once each time the robot enters autonomous mode.
      */
-    Joystick wheel = new Joystick(1);
-    Joystick throttle = new Joystick(2);
-    //Joystick xBox = new Joystick(3);
+    /*Joystick wheel = new Joystick(1);
+    Joystick throttle = new Joystick(2);*/
+    Joystick xBox = new Joystick(3);
     Victor leftDrive1 = new Victor(6, 1);
     Victor leftDrive2 = new Victor(6, 2);
     Victor leftDrive3 = new Victor(6, 3);
@@ -80,7 +80,7 @@ public class RobotTemplate extends SimpleRobot
      solenoidArm.set(DoubleSolenoid.Value.kReverse);
      }*/
 
-    public void drive()
+    /*public void drive()
     {
         if(throttle.getRawButton(2))
         {
@@ -97,6 +97,10 @@ public class RobotTemplate extends SimpleRobot
             setRightSpeed(-(throttle.getRawAxis(1) - wheel.getAxis(Joystick.AxisType.kX)));
             setLeftSpeed(throttle.getRawAxis(1));
         }
+    }*/
+    public void drive(){
+        setLeftSpeed(xBox.getRawAxis(1));
+        setRightSpeed(-xBox.getRawAxis(5));
     }
 
     /*public void driveStraight()

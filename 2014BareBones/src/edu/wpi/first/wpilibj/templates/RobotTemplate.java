@@ -33,28 +33,33 @@ public class RobotTemplate extends SimpleRobot
      */
     Joystick wheel = new Joystick(1);
     Joystick throttle = new Joystick(2);
-    //Joystick xBox = new Joystick(3);
-    Victor leftDrive1 = new Victor(6, 1);
-    Victor leftDrive2 = new Victor(6, 2);
-    Victor leftDrive3 = new Victor(6, 3);
-    Victor rightDrive1 = new Victor(6, 4);
-    Victor rightDrive2 = new Victor(6, 5);
-    Victor rightDrive3 = new Victor(6, 6);
-    /*Victor intake = new Victor(6, 7);
-     Victor catapault1 = new Victor(6, 8);
-     Victor catapault2 = new Victor(6, 9);
+    Joystick xBox = new Joystick(3);
+    Solenoid cameraLight = new Solenoid(2, 3);
+    Victor leftDrive1 = new Victor(2, 1);
+    Victor leftDrive2 = new Victor(2, 2);
+    Victor leftDrive3 = new Victor(2, 3);
+    Victor rightDrive1 = new Victor(2, 4);
+    Victor rightDrive2 = new Victor(2, 5);
+    Victor rightDrive3 = new Victor(2, 6);
+    Victor intake = new Victor(2, 7);
+    Compressor compressor = new Compressor(2, 1, 2, 2);
+    AnalogChannel ultrasonic = new AnalogChannel(2, 1);
+    DoubleSolenoid solenoidArm = new DoubleSolenoid(2, 1, 2);
+    Victor catapault1 = new Victor(2, 8);
+    Victor catapault2 = new Victor(2, 9);
+    DigitalInput limCatapult = new DigitalInput(2, 3);
+    DoubleSolenoid solenoidShooter = new DoubleSolenoid(2, 5, 6);
+    DriverStation driverStation = DriverStation.getInstance();
+    Timer shooterTimer = new Timer();
+    Timer windupTimer = new Timer();
+    /*
+     
      Gyro gyro = new Gyro(5, 2);
-     AnalogChannel ultrasonic = new AnalogChannel(5, 3);
-     DigitalInput limCatapult = new DigitalInput(6, 3);
-     Solenoid cameraLight = new Solenoid(7, 3);
-     DoubleSolenoid solenoidArm = new DoubleSolenoid(7, 1, 2);
-     DoubleSolenoid solenoidShooter = new DoubleSolenoid(7, 5, 6);
-     Compressor compressor = new Compressor(6, 1, 6, 1);
-     Timer shooterTimer = new Timer();
-     Timer windupTimer = new Timer();
+     
+     
+    
      Timer autoTime = new Timer();
      VisionThingy vision = new VisionThingy();
-     DriverStation driverStation = DriverStation.getInstance();
      boolean emergencyStop = false;
      Timer straightDriveTimer = new Timer();
      //double KP = .2;
@@ -64,40 +69,49 @@ public class RobotTemplate extends SimpleRobot
      SmartDashboard.putDouble("Gyro's output: ", gyro.getAngle());
      }
 
-     public double ultrasonicDistance()
-     {
-     SmartDashboard.putDouble("Ultrasonic Voltage", ultrasonic.getVoltage());
-     return ((ultrasonic.getVoltage()) * 3.47826087) - 0.25;
-     }
 
-     public void lowerIntake()
-     {
-     solenoidArm.set(DoubleSolenoid.Value.kForward);
-     }
+     */
 
-     public void raiseIntake()
-     {
-     solenoidArm.set(DoubleSolenoid.Value.kReverse);
-     }*/
+    public void lowerIntake()
+    {
+        solenoidArm.set(DoubleSolenoid.Value.kForward);
+    }
+
+    public void raiseIntake()
+    {
+        solenoidArm.set(DoubleSolenoid.Value.kReverse);
+    }
+
+    public double ultrasonicDistance()
+    {
+        SmartDashboard.putDouble("Ultrasonic Distance", (ultrasonic.getVoltage() * 3.47826087) - 0.25);
+        return ((ultrasonic.getVoltage()) * 3.47826087) - 0.25;
+    }
 
     public void drive()
     {
-        if(throttle.getRawButton(2))
-        {
-            setLeftSpeed(wheel.getAxis(Joystick.AxisType.kX));
-            setRightSpeed(wheel.getAxis(Joystick.AxisType.kX));
-        }
-        else if(wheel.getAxis(Joystick.AxisType.kX) <= 0)
-        {
-            setLeftSpeed(throttle.getRawAxis(1) + wheel.getAxis(Joystick.AxisType.kX));
-            setRightSpeed(-throttle.getRawAxis(1));
-        }
-        else
-        {
-            setRightSpeed(-(throttle.getRawAxis(1) - wheel.getAxis(Joystick.AxisType.kX)));
-            setLeftSpeed(throttle.getRawAxis(1));
-        }
+        setLeftSpeed(-xBox.getRawAxis(2));
+        setRightSpeed(xBox.getRawAxis(5));
     }
+
+    /*public void drive()
+     {
+     if(throttle.getRawButton(2))
+     {
+     setLeftSpeed(wheel.getAxis(Joystick.AxisType.kX));
+     setRightSpeed(wheel.getAxis(Joystick.AxisType.kX));
+     }
+     else if(wheel.getAxis(Joystick.AxisType.kX) <= 0)
+     {
+     setLeftSpeed(throttle.getRawAxis(1) + wheel.getAxis(Joystick.AxisType.kX));
+     setRightSpeed(-throttle.getRawAxis(1));
+     }
+     else
+     {
+     setRightSpeed(-(throttle.getRawAxis(1) - wheel.getAxis(Joystick.AxisType.kX)));
+     setLeftSpeed(throttle.getRawAxis(1));
+     }
+     }*/
 
     /*public void driveStraight()
      {
@@ -115,11 +129,6 @@ public class RobotTemplate extends SimpleRobot
      {
      SmartDashboard.putBoolean("Replace Battery NOW", false);
      }
-     }
-
-     public void intake()
-     {
-     intake.set(xBox.getRawAxis(2) / 2);
      }
 
      /*public void charge(double distance)
@@ -147,13 +156,48 @@ public class RobotTemplate extends SimpleRobot
         leftDrive2.set(speed);
         leftDrive3.set(speed);
     }
-    
+
     public void setRightSpeed(double speed)
     {
         rightDrive1.set(speed);
         rightDrive2.set(speed);
         rightDrive3.set(speed);
     }
+
+    public void intake()
+    {
+        intake.set(xBox.getRawAxis(2) / 2);
+    }
+
+    public void fire()
+    {
+        solenoidShooter.set(DoubleSolenoid.Value.kForward);
+        shooterTimer.start();
+    }
+
+    public void windup()
+    {
+        if((solenoidShooter.get() == DoubleSolenoid.Value.kReverse) && !limCatapult.get())
+        {
+            if(windupTimer.get() == 0){
+                windupTimer.start();
+            } 
+            catapault1.set(-(windupTimer.get() / 2));
+            catapault2.set(-(windupTimer.get()) / 2);
+            if(windupTimer.get() > 2)
+            {
+                windupTimer.stop();
+            }
+        }
+        else
+        {
+            catapault1.set(0);
+            catapault2.set(0);
+            windupTimer.reset();
+            windupTimer.stop();
+        }
+    }
+
 
     /*public void autonomous()
      {
@@ -235,60 +279,79 @@ public class RobotTemplate extends SimpleRobot
      }
      }
 
-     public void fire()
-     {
-     solenoidShooter.set(DoubleSolenoid.Value.kReverse);
-     shooterTimer.start();
-     }
-
-     public void windup()
-     {
-     if((solenoidShooter.get() == DoubleSolenoid.Value.kForward) && limCatapult.get())
-     {
-     windupTimer.start();
-     catapault1.set(windupTimer.get() / 2);
-     catapault2.set(-(windupTimer.get()) / 2);
-     if(windupTimer.get() > 2)
-     {
-     windupTimer.stop();
-     }
-     }
-     else
-     {
-     catapault1.set(0);
-     catapault2.set(0);
-     windupTimer.reset();
-     windupTimer.stop();
-     }
-     }
+    
 
      /**
      * This function is called once each time the robot enters operator control.
      */
     public void operatorControl()
     {
-        /*cameraLight.set(true);
-         compressor.start();
-         autoTime.reset();
+        compressor.start();
+        cameraLight.set(true);
+        solenoidShooter.set(DoubleSolenoid.Value.kReverse);
+        solenoidArm.set(DoubleSolenoid.Value.kForward);
+        /*autoTime.reset();
          autoTime.stop();*/
         while(isOperatorControl() && isEnabled())
         {
+            if(xBox.getRawButton(6))
+            {
+                lowerIntake();
+            }
+            else if(xBox.getRawButton(5))
+            {
+                raiseIntake();
+            }
+            intake();
+
+            if(throttle.getRawButton(1))
+            {
+                fire();
+            }
+            else if(shooterTimer.get() > 1)
+            {
+                solenoidShooter.set(DoubleSolenoid.Value.kReverse);
+                shooterTimer.reset();
+                shooterTimer.stop();
+            }
+            windup();
+            ultrasonicDistance();
+             //drive();
+            
+        }
+    }
+
+    /**
+     * This function is called once each time the robot enters test mode.
+     */
+    public void test()
+    {
+    }
+}
+
+/*if(!limCatapult.get())
+             {
+             catapault1.set(-Math.abs(xBox.getRawAxis(5)));
+             catapault2.set(-Math.abs(xBox.getRawAxis(5))); //Only takes negative
+             }else{
+             catapault1.set(0);
+             catapault2.set(0);
+             }
+             System.out.println(limCatapult.get());
+             if(xBox.getRawButton(1))
+             {
+             solenoidShooter.set(DoubleSolenoid.Value.kReverse);
+             }
+             else if(xBox.getRawButton(2))
+             {
+             solenoidShooter.set(DoubleSolenoid.Value.kForward); //B fires
+             }*/
             /*gyroDashboard();
-             if(throttle.getRawButton(1))
-             {
-             fire();
-             }
-             else if(shooterTimer.get() > 1)
-             {
-             solenoidShooter.set(DoubleSolenoid.Value.kForward);
-             shooterTimer.reset();
-             shooterTimer.stop();
-             }
+           
              if(!emergencyStop)
              {
              windup();
              }*/
-            drive();
             /*intake();
              if(xBox.getRawButton(2))
              {
@@ -302,23 +365,4 @@ public class RobotTemplate extends SimpleRobot
              {
              emergencyStop = false;
              }
-             if(xBox.getRawButton(5))
-             {
-             lowerIntake();
-             }
-             else if(xBox.getRawButton(6))
-             {
-             raiseIntake();
-             }
              }*/
-            //compressor.stop();
-        }
-    }
-
-    /**
-     * This function is called once each time the robot enters test mode.
-     */
-    public void test()
-    {
-    }
-}

@@ -35,21 +35,22 @@ public class RobotTemplate extends SimpleRobot
     Joystick throttle = new Joystick(2);
     Joystick xBox = new Joystick(3);
     Solenoid cameraLight = new Solenoid(2, 3);
-    Victor leftDrive1 = new Victor(2, 1);
-    Victor leftDrive2 = new Victor(2, 2);
-    Victor leftDrive3 = new Victor(2, 3);
-    Victor rightDrive1 = new Victor(2, 4);
-    Victor rightDrive2 = new Victor(2, 5);
-    Victor rightDrive3 = new Victor(2, 6);
-    Victor intake = new Victor(2, 7);
-    Compressor compressor = new Compressor(2, 1, 2, 2);
-    AnalogChannel ultrasonic = new AnalogChannel(2, 1);
+    Victor leftDrive1 = new Victor(1);
+    Victor leftDrive2 = new Victor(2);
+    Victor leftDrive3 = new Victor(3);
+    Victor rightDrive1 = new Victor(4);
+    Victor rightDrive2 = new Victor(5);
+    Victor rightDrive3 = new Victor(6);
+    Victor intake = new Victor(7);
+    Compressor compressor = new Compressor(1, 2);
+    AnalogChannel ultrasonic = new AnalogChannel(1);
     DoubleSolenoid solenoidArm = new DoubleSolenoid(2, 1, 2);
-    Victor catapault1 = new Victor(2, 8);
-    Victor catapault2 = new Victor(2, 9);
-    DigitalInput limCatapult = new DigitalInput(2, 3);
+    Victor catapault1 = new Victor(8);
+    Victor catapault2 = new Victor(9);
+    DigitalInput limCatapult = new DigitalInput(3);
     DoubleSolenoid solenoidShooter = new DoubleSolenoid(2, 5, 6);
     DriverStation driverStation = DriverStation.getInstance();
+    boolean windupFlag = false;
     Timer shooterTimer = new Timer();
     Timer windupTimer = new Timer();
     /*
@@ -88,30 +89,29 @@ public class RobotTemplate extends SimpleRobot
         return ((ultrasonic.getVoltage()) * 3.47826087) - 0.25;
     }
 
-    public void drive()
-    {
-        setLeftSpeed(-xBox.getRawAxis(2));
-        setRightSpeed(xBox.getRawAxis(5));
-    }
-
     /*public void drive()
      {
-     if(throttle.getRawButton(2))
-     {
-     setLeftSpeed(wheel.getAxis(Joystick.AxisType.kX));
-     setRightSpeed(wheel.getAxis(Joystick.AxisType.kX));
-     }
-     else if(wheel.getAxis(Joystick.AxisType.kX) <= 0)
-     {
-     setLeftSpeed(throttle.getRawAxis(1) + wheel.getAxis(Joystick.AxisType.kX));
-     setRightSpeed(-throttle.getRawAxis(1));
-     }
-     else
-     {
-     setRightSpeed(-(throttle.getRawAxis(1) - wheel.getAxis(Joystick.AxisType.kX)));
-     setLeftSpeed(throttle.getRawAxis(1));
-     }
+     setLeftSpeed(-xBox.getRawAxis(2));
+     setRightSpeed(xBox.getRawAxis(5));
      }*/
+    public void drive()
+    {
+        if(throttle.getRawButton(1))
+        {
+            setLeftSpeed(wheel.getAxis(Joystick.AxisType.kX));
+            setRightSpeed(wheel.getAxis(Joystick.AxisType.kX));
+        }
+        else if(wheel.getAxis(Joystick.AxisType.kX) <= 0)
+        {
+            setLeftSpeed(throttle.getRawAxis(2) + wheel.getAxis(Joystick.AxisType.kX));
+            setRightSpeed(-throttle.getRawAxis(2));
+        }
+        else
+        {
+            setRightSpeed(-(throttle.getRawAxis(2) - wheel.getAxis(Joystick.AxisType.kX)));
+            setLeftSpeed(throttle.getRawAxis(2));
+        }
+    }
 
     /*public void driveStraight()
      {
@@ -150,7 +150,7 @@ public class RobotTemplate extends SimpleRobot
      }
      }
      }*/
-    public void setLeftSpeed(double speed)
+   public void setLeftSpeed(double speed)
     {
         leftDrive1.set(speed);
         leftDrive2.set(speed);
@@ -179,11 +179,12 @@ public class RobotTemplate extends SimpleRobot
     {
         if((solenoidShooter.get() == DoubleSolenoid.Value.kReverse) && !limCatapult.get())
         {
-            if(windupTimer.get() == 0){
+            if(windupTimer.get() == 0)
+            {
                 windupTimer.start();
-            } 
-            catapault1.set(-(windupTimer.get() / 2));
-            catapault2.set(-(windupTimer.get()) / 2);
+            }
+            catapault1.set(-(windupTimer.get() / 4));
+            catapault2.set(-(windupTimer.get()) / 4);
             if(windupTimer.get() > 2)
             {
                 windupTimer.stop();
@@ -195,6 +196,7 @@ public class RobotTemplate extends SimpleRobot
             catapault2.set(0);
             windupTimer.reset();
             windupTimer.stop();
+            windupFlag = false;
         }
     }
 
@@ -288,8 +290,9 @@ public class RobotTemplate extends SimpleRobot
     {
         compressor.start();
         cameraLight.set(true);
-        solenoidShooter.set(DoubleSolenoid.Value.kReverse);
-        solenoidArm.set(DoubleSolenoid.Value.kForward);
+        solenoidShooter.set(DoubleSolenoid.Value.kReverse); //Pulled in
+        solenoidArm.set(DoubleSolenoid.Value.kReverse); //Out
+        windupFlag = false;
         /*autoTime.reset();
          autoTime.stop();*/
         while(isOperatorControl() && isEnabled())
@@ -304,7 +307,7 @@ public class RobotTemplate extends SimpleRobot
             }
             intake();
 
-            if(throttle.getRawButton(1))
+            if(throttle.getRawButton(2))
             {
                 fire();
             }
@@ -314,10 +317,23 @@ public class RobotTemplate extends SimpleRobot
                 shooterTimer.reset();
                 shooterTimer.stop();
             }
-            windup();
+            if(xBox.getRawButton(1))
+            {
+                windupFlag = true;
+            }else if(xBox.getRawButton(2)){
+                windupFlag = false;
+                catapault1.set(0);
+                catapault2.set(0);
+            }
+            if(windupFlag)
+            {
+                windup();
+            }
+            SmartDashboard.putDouble("Joystick: ", throttle.getRawAxis(2));
+            SmartDashboard.putDouble("Wheel: ", wheel.getAxis(Joystick.AxisType.kX));
             ultrasonicDistance();
-             //drive();
-            
+            drive();
+
         }
     }
 
@@ -330,39 +346,39 @@ public class RobotTemplate extends SimpleRobot
 }
 
 /*if(!limCatapult.get())
-             {
-             catapault1.set(-Math.abs(xBox.getRawAxis(5)));
-             catapault2.set(-Math.abs(xBox.getRawAxis(5))); //Only takes negative
-             }else{
-             catapault1.set(0);
-             catapault2.set(0);
-             }
-             System.out.println(limCatapult.get());
-             if(xBox.getRawButton(1))
-             {
-             solenoidShooter.set(DoubleSolenoid.Value.kReverse);
-             }
-             else if(xBox.getRawButton(2))
-             {
-             solenoidShooter.set(DoubleSolenoid.Value.kForward); //B fires
-             }*/
-            /*gyroDashboard();
+ {
+ catapault1.set(-Math.abs(xBox.getRawAxis(5)));
+ catapault2.set(-Math.abs(xBox.getRawAxis(5))); //Only takes negative
+ }else{
+ catapault1.set(0);
+ catapault2.set(0);
+ }
+ System.out.println(limCatapult.get());
+ if(xBox.getRawButton(1))
+ {
+ solenoidShooter.set(DoubleSolenoid.Value.kReverse);
+ }
+ else if(xBox.getRawButton(2))
+ {
+ solenoidShooter.set(DoubleSolenoid.Value.kForward); //B fires
+ }*/
+/*gyroDashboard();
            
-             if(!emergencyStop)
-             {
-             windup();
-             }*/
-            /*intake();
-             if(xBox.getRawButton(2))
-             {
-             emergencyStop = true;
-             catapault1.set(0);
-             catapault2.set(0);
-             windupTimer.reset();
-             windupTimer.stop();
-             }
-             else if(xBox.getRawButton(1))
-             {
-             emergencyStop = false;
-             }
-             }*/
+ if(!emergencyStop)
+ {
+ windup();
+ }*/
+/*intake();
+ if(xBox.getRawButton(2))
+ {
+ emergencyStop = true;
+ catapault1.set(0);
+ catapault2.set(0);
+ windupTimer.reset();
+ windupTimer.stop();
+ }
+ else if(xBox.getRawButton(1))
+ {
+ emergencyStop = false;
+ }
+ }*/

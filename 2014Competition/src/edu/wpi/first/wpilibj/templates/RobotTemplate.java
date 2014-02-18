@@ -353,7 +353,7 @@ public class RobotTemplate extends SimpleRobot
 
     public void robotInit()
     {
-        System.out.println("Electrical peoples are slow");
+        System.out.println("Electrical peoples are slow /(Both ways/)");
     }
 
     public void fire()

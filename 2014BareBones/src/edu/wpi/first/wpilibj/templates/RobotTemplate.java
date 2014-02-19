@@ -195,13 +195,9 @@ public class RobotTemplate extends SimpleRobot
     public void wallDistance(final double distance)
     {
         final double kP = -0.125;
-
         double cP;
-
         double power;
-
         double ultrasonicDistance;
-
         while(isEnabled())
         {
             ultrasonicDistance = ultrasonicDistance();
@@ -241,9 +237,21 @@ public class RobotTemplate extends SimpleRobot
         shooterTimer.start();
     }
 
-    public void compressorCheckThingy(boolean override)
+    public void compressorCheck(boolean override, boolean manual)
     {
-        if(override || ((Math.abs(leftDrive1.get()) + Math.abs(leftDrive2.get()) + Math.abs(leftDrive3.get()) + Math.abs(rightDrive1.get()) + Math.abs(rightDrive2.get()) + Math.abs(rightDrive3.get())) < MAX_MOTOR_POWER_FOR_COMPRESSION))
+        boolean compressorOn = Math.abs((leftDrive1.get()*3) - (-rightDrive1.get()*3)) < 1.5;
+        if(manual)
+        {
+            if(override)
+            {
+                compressor.start();
+            }
+            else
+            {
+                compressor.stop();
+            }
+        }
+        else if(compressorOn)
         {
             compressor.start();
         }
@@ -380,7 +388,9 @@ public class RobotTemplate extends SimpleRobot
      */
     public void operatorControl()
     {
-        //boolean overrideCompressor = false;
+        Timer inputTimer = new Timer();
+        boolean manualCompressorOn = false;
+        boolean manualControl = false;
         compressor.start();
         solenoidShooter.set(DoubleSolenoid.Value.kReverse); //Pulled in
         solenoidArm.set(DoubleSolenoid.Value.kForward); //In
@@ -389,6 +399,7 @@ public class RobotTemplate extends SimpleRobot
         catapault2.set(0);
         autoTime.reset();
         autoTime.stop();
+        inputTimer.start();
         while(isOperatorControl() && isEnabled())
         {
             checkBattery();
@@ -433,34 +444,40 @@ public class RobotTemplate extends SimpleRobot
             {
                 windup();
             }
-            if(throttle.getRawButton(10))
+            if(throttle.getRawButton(6))
             {
-                compressor.stop();
-                //overrideCompressor = !overrideCompressor;
-
+                manualControl = false;
+            }
+            else if(throttle.getRawButton(7))
+            {
+                manualCompressorOn = false;
+            }
+            else if(throttle.getRawButton(10))
+            {
+                //compressor.stop();
+                manualCompressorOn = true;
             }
             else if(throttle.getRawButton(11))
             {
-                /*if(compressor.enabled()) {
-                 compressor.stop();
-                 } else {
-                 compressor.start();
-                 }*/
-                compressor.start();
+                manualControl = true;
             }
-            //compressorCheckThingy(overrideCompressor);
-            SmartDashboard.putDouble("Joystick: ", throttle.getRawAxis(2));
-            SmartDashboard.putDouble("Wheel: ", swAdjust(wheel.getAxis(Joystick.AxisType.kX)));
-            SmartDashboard.putDouble("Intake: ", xBox.getRawAxis(2));
+            compressorCheck(manualCompressorOn, manualControl);
+            SmartDashboard.putNumber("left drive 1 power",leftDrive1.get());
+            SmartDashboard.putNumber("right drive 1 power",rightDrive1.get());
+            SmartDashboard.putBoolean("Manual compressor state", manualCompressorOn);
+            SmartDashboard.putBoolean("Manual control enabled", manualControl);
+            SmartDashboard.putNumber("Joystick: ", throttle.getRawAxis(2));
+            SmartDashboard.putNumber("Wheel: ", swAdjust(wheel.getAxis(Joystick.AxisType.kX)));
+            SmartDashboard.putNumber("Intake: ", xBox.getRawAxis(2));
             SmartDashboard.putBoolean("Pressure Switch: ", compressor.getPressureSwitchValue());
             ultrasonicDistance();
             drive();
-
         }
     }
 
     public void test()
     {
+        
     }
 }
 /*if(!limCatapult.get())

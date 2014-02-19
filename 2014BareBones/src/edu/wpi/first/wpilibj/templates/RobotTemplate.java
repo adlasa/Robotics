@@ -302,13 +302,14 @@ public class RobotTemplate extends SimpleRobot
     {
         cameraLight.set(true);
         compressor.start();
-        lowerIntake();
         if(!driverStation.getDigitalIn(2))
         {
             autoTime.start();
             driveStraight(0.4);
-            Timer.delay(1);
+            Timer.delay(2);
             driveStraight(0);
+            lowerIntake();
+            Timer.delay(1);
             //charge(14);
             while(isAutonomous() && isEnabled())
             {
@@ -340,11 +341,12 @@ public class RobotTemplate extends SimpleRobot
         }
         else
         {
+            lowerIntake();
             intake.set(0.4);
-            Timer.delay(0.2);
+            Timer.delay(0.5);
             intake.set(0);
             driveStraight(0.4);
-            Timer.delay(1);
+            Timer.delay(2);
             driveStraight(0);
             solenoidShooter.set(DoubleSolenoid.Value.kForward);
             Timer.delay(1);

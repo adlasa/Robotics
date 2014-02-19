@@ -31,16 +31,23 @@ public class RobotTemplate extends SimpleRobot
     /**
      * This function is called once each time the robot enters autonomous mode.
      */
+<<<<<<< HEAD
     Joystick wheel = new Joystick(1);
     Joystick throttle = new Joystick(2);
     Joystick xBox = new Joystick(3);
     Solenoid cameraLight = new Solenoid(2, 3);
+=======
+    /*Joystick wheel = new Joystick(1);
+    Joystick throttle = new Joystick(2);*/
+    Joystick xBox = new Joystick(3);
+>>>>>>> 765e53bf4ccbdb172aa19f30452705a889da2aee
     Victor leftDrive1 = new Victor(1);
     Victor leftDrive2 = new Victor(2);
     Victor leftDrive3 = new Victor(3);
     Victor rightDrive1 = new Victor(4);
     Victor rightDrive2 = new Victor(5);
     Victor rightDrive3 = new Victor(6);
+<<<<<<< HEAD
     Victor intake = new Victor(7);
     Compressor compressor = new Compressor(1, 2);
     AnalogChannel ultrasonic = new AnalogChannel(1);
@@ -59,6 +66,11 @@ public class RobotTemplate extends SimpleRobot
     public final double MAX_MOTOR_POWER_FOR_COMPRESSION = 2;
     /*
      
+=======
+    /*Victor intake = new Victor(6, 7);
+     Victor catapault1 = new Victor(6, 8);
+     Victor catapault2 = new Victor(6, 9);
+>>>>>>> 765e53bf4ccbdb172aa19f30452705a889da2aee
      Gyro gyro = new Gyro(5, 2);
      
      
@@ -109,7 +121,12 @@ public class RobotTemplate extends SimpleRobot
      setLeftSpeed(-xBox.getRawAxis(2));
      setRightSpeed(xBox.getRawAxis(5));
      }*/
+<<<<<<< HEAD
     public void drive()
+=======
+
+    /*public void drive()
+>>>>>>> 765e53bf4ccbdb172aa19f30452705a889da2aee
     {
         if(throttle.getRawButton(1))
         {
@@ -126,6 +143,10 @@ public class RobotTemplate extends SimpleRobot
             setRightSpeed(-(throttle.getRawAxis(2) * (1 - swAdjust(wheel.getAxis(Joystick.AxisType.kX)))));
             setLeftSpeed(throttle.getRawAxis(2));
         }
+    }*/
+    public void drive(){
+        setLeftSpeed(xBox.getRawAxis(2));
+        setRightSpeed(-xBox.getRawAxis(5));
     }
     /*public void drive(){
         

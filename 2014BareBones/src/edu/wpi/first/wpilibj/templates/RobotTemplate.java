@@ -31,23 +31,16 @@ public class RobotTemplate extends SimpleRobot
     /**
      * This function is called once each time the robot enters autonomous mode.
      */
-<<<<<<< HEAD
     Joystick wheel = new Joystick(1);
     Joystick throttle = new Joystick(2);
     Joystick xBox = new Joystick(3);
     Solenoid cameraLight = new Solenoid(2, 3);
-=======
-    /*Joystick wheel = new Joystick(1);
-    Joystick throttle = new Joystick(2);*/
-    Joystick xBox = new Joystick(3);
->>>>>>> 765e53bf4ccbdb172aa19f30452705a889da2aee
     Victor leftDrive1 = new Victor(1);
     Victor leftDrive2 = new Victor(2);
     Victor leftDrive3 = new Victor(3);
     Victor rightDrive1 = new Victor(4);
     Victor rightDrive2 = new Victor(5);
     Victor rightDrive3 = new Victor(6);
-<<<<<<< HEAD
     Victor intake = new Victor(7);
     Compressor compressor = new Compressor(1, 2);
     AnalogChannel ultrasonic = new AnalogChannel(1);
@@ -66,11 +59,11 @@ public class RobotTemplate extends SimpleRobot
     public final double MAX_MOTOR_POWER_FOR_COMPRESSION = 2;
     /*
      
-=======
-    /*Victor intake = new Victor(6, 7);
+     =======
+     /*Victor intake = new Victor(6, 7);
      Victor catapault1 = new Victor(6, 8);
      Victor catapault2 = new Victor(6, 9);
->>>>>>> 765e53bf4ccbdb172aa19f30452705a889da2aee
+     >>>>>>> 765e53bf4ccbdb172aa19f30452705a889da2aee
      Gyro gyro = new Gyro(5, 2);
      
      
@@ -121,30 +114,27 @@ public class RobotTemplate extends SimpleRobot
      setLeftSpeed(-xBox.getRawAxis(2));
      setRightSpeed(xBox.getRawAxis(5));
      }*/
-<<<<<<< HEAD
+    /*
+     public void drive()
+     {
+     if(throttle.getRawButton(1))
+     {
+     setLeftSpeed(swAdjust(-wheel.getAxis(Joystick.AxisType.kX)));
+     setRightSpeed(swAdjust(-wheel.getAxis(Joystick.AxisType.kX)));
+     }
+     else if(wheel.getAxis(Joystick.AxisType.kX) <= 0)
+     {
+     setLeftSpeed(throttle.getRawAxis(2) * (1 + swAdjust(wheel.getAxis(Joystick.AxisType.kX))));
+     setRightSpeed(-throttle.getRawAxis(2));
+     }
+     else
+     {
+     setRightSpeed(-(throttle.getRawAxis(2) * (1 - swAdjust(wheel.getAxis(Joystick.AxisType.kX)))));
+     setLeftSpeed(throttle.getRawAxis(2));
+     }
+     }*/
     public void drive()
-=======
-
-    /*public void drive()
->>>>>>> 765e53bf4ccbdb172aa19f30452705a889da2aee
     {
-        if(throttle.getRawButton(1))
-        {
-            setLeftSpeed(swAdjust(-wheel.getAxis(Joystick.AxisType.kX)));
-            setRightSpeed(swAdjust(-wheel.getAxis(Joystick.AxisType.kX)));
-        }
-        else if(wheel.getAxis(Joystick.AxisType.kX) <= 0)
-        {
-            setLeftSpeed(throttle.getRawAxis(2) * (1 + swAdjust(wheel.getAxis(Joystick.AxisType.kX))));
-            setRightSpeed(-throttle.getRawAxis(2));
-        }
-        else
-        {
-            setRightSpeed(-(throttle.getRawAxis(2) * (1 - swAdjust(wheel.getAxis(Joystick.AxisType.kX)))));
-            setLeftSpeed(throttle.getRawAxis(2));
-        }
-    }*/
-    public void drive(){
         setLeftSpeed(xBox.getRawAxis(2));
         setRightSpeed(-xBox.getRawAxis(5));
     }
@@ -237,48 +227,48 @@ public class RobotTemplate extends SimpleRobot
         double power;
 
         double ultrasonicDistance;
-/*
-        double straightAngle;
-        double pCorrection;
-        double iCorrection;
-        double totalCorrection;
-        final double GkP = 0.25, GkI = 1.0;
-        straightAngle = gyro.getAngle();
-*/
+        /*
+         double straightAngle;
+         double pCorrection;
+         double iCorrection;
+         double totalCorrection;
+         final double GkP = 0.25, GkI = 1.0;
+         straightAngle = gyro.getAngle();
+         */
         while(isEnabled())
         {
             ultrasonicDistance = ultrasonicDistance();
             cP = (distance - ultrasonicDistance) * kP;
             power = 1.0 * cP;
             /*
-            pCorrection = (-gyro.getRate()) * GkP;
-            iCorrection = (straightAngle - gyro.getAngle()) * GkI;
-            totalCorrection = pCorrection + iCorrection;
+             pCorrection = (-gyro.getRate()) * GkP;
+             iCorrection = (straightAngle - gyro.getAngle()) * GkI;
+             totalCorrection = pCorrection + iCorrection;
 
-            totalCorrection /= 10;
-            if(totalCorrection > 1)
-            {
-                totalCorrection = 1;
-            }
-            else if(totalCorrection < -1)
-            {
-                totalCorrection = -1;
-            }
-            if(totalCorrection < 0)
-            {
-                setLeftSpeed(-power * (1 - Math.abs(totalCorrection)));
-                setRightSpeed(-power);
-            }
-            else if(totalCorrection > 0)
-            {
-                setLeftSpeed(-power);
-                setRightSpeed(-power * (1 - Math.abs(totalCorrection)));
-            }
-            else
-            {
-                bothSet(-power);
-            }
-            * */
+             totalCorrection /= 10;
+             if(totalCorrection > 1)
+             {
+             totalCorrection = 1;
+             }
+             else if(totalCorrection < -1)
+             {
+             totalCorrection = -1;
+             }
+             if(totalCorrection < 0)
+             {
+             setLeftSpeed(-power * (1 - Math.abs(totalCorrection)));
+             setRightSpeed(-power);
+             }
+             else if(totalCorrection > 0)
+             {
+             setLeftSpeed(-power);
+             setRightSpeed(-power * (1 - Math.abs(totalCorrection)));
+             }
+             else
+             {
+             bothSet(-power);
+             }
+             * */
             driveStraight(-power);
             if(Math.abs(ultrasonicDistance - distance) < 0.25)
             {
@@ -312,7 +302,7 @@ public class RobotTemplate extends SimpleRobot
         solenoidShooter.set(DoubleSolenoid.Value.kForward);
         shooterTimer.start();
     }
-    
+
     public void compressorCheckThingy(boolean override)
     {
         if(override || ((Math.abs(leftDrive1.get()) + Math.abs(leftDrive2.get()) + Math.abs(leftDrive3.get()) + Math.abs(rightDrive1.get()) + Math.abs(rightDrive2.get()) + Math.abs(rightDrive3.get())) < MAX_MOTOR_POWER_FOR_COMPRESSION))
@@ -324,7 +314,7 @@ public class RobotTemplate extends SimpleRobot
             compressor.stop();
         }
     }
-    
+
     public void checkBattery()
     {
         if(driverStation.getBatteryVoltage() < 12)
@@ -402,7 +392,7 @@ public class RobotTemplate extends SimpleRobot
                  straightDriveTimer.stop();*/
             }
         }
-        else 
+        else
         {
             intake.set(0.4);
             Timer.delay(0.2);
@@ -432,16 +422,16 @@ public class RobotTemplate extends SimpleRobot
             {
                 windup();
                 /*straightDriveTimer.start();
-                if(straightDriveTimer.get() < 1)
-                {
-                    driveStraight(0.5);
-                }
-                else
-                {
-                    setRightSpeed(0);
-                    setLeftSpeed(0);
-                    straightDriveTimer.stop();
-                }*/
+                 if(straightDriveTimer.get() < 1)
+                 {
+                 driveStraight(0.5);
+                 }
+                 else
+                 {
+                 setRightSpeed(0);
+                 setLeftSpeed(0);
+                 straightDriveTimer.stop();
+                 }*/
                 return;
             }
         }
@@ -465,10 +455,12 @@ public class RobotTemplate extends SimpleRobot
         while(isOperatorControl() && isEnabled())
         {
             checkBattery();
+            /*
             if(MorseCode.isDone)
             {
                 (new Thread(new MorseCode("SOS", cameraLight))).start();
             }
+            * */
             // Swapped the lower and raise intake buttons first period 2/18. - Bonnie
             if(xBox.getRawButton(5))
             {
@@ -504,16 +496,19 @@ public class RobotTemplate extends SimpleRobot
             {
                 windup();
             }
-            if(throttle.getRawButton(10)){
+            if(throttle.getRawButton(10))
+            {
                 compressor.stop();
                 //overrideCompressor = !overrideCompressor;
-                
-            }else if(throttle.getRawButton(11)){
+
+            }
+            else if(throttle.getRawButton(11))
+            {
                 /*if(compressor.enabled()) {
-                    compressor.stop();
-                } else {
-                    compressor.start();
-                }*/
+                 compressor.stop();
+                 } else {
+                 compressor.start();
+                 }*/
                 compressor.start();
             }
             //compressorCheckThingy(overrideCompressor);

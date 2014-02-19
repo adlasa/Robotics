@@ -404,6 +404,14 @@ public class RobotTemplate extends SimpleRobot
         {
             checkBattery();
 
+            if(xBox.getRawButton(4)) {
+                intake.set(0.35);
+            } else if (xBox.getRawButton(3)){
+                intake.set(.2675);
+            } else {
+                intake();
+            }
+            
             if(MorseCode.isDone)
             {
                 (new Thread(new MorseCode("SOS", cameraLight))).start();
@@ -418,7 +426,6 @@ public class RobotTemplate extends SimpleRobot
             {
                 raiseIntake();
             }
-            intake();
             SmartDashboard.putBoolean("Image: ", vision.isHot);
             if(throttle.getRawButton(2))
             {

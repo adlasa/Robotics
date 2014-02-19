@@ -53,16 +53,19 @@ public class RobotTemplate extends SimpleRobot
     boolean windupFlag = false;
     Timer shooterTimer = new Timer();
     Timer windupTimer = new Timer();
+    Timer autoTime = new Timer();
+    VisionThingy vision = new VisionThingy();
+    Timer straightDriveTimer = new Timer();
     /*
      
      Gyro gyro = new Gyro(5, 2);
      
      
     
-     Timer autoTime = new Timer();
-     VisionThingy vision = new VisionThingy();
+     
+    
      boolean emergencyStop = false;
-     Timer straightDriveTimer = new Timer();
+     
      //double KP = .2;
 
      public void gyroDashboard()
@@ -73,14 +76,25 @@ public class RobotTemplate extends SimpleRobot
 
      */
 
+    double swAdjust(double i)
+    {
+        //increase so bottom is 0
+        i += 0.945;
+        //multiply so top is 2
+        i *= 1.13378685;
+        //put back into -1 to 1
+        i -= 1.001;
+        return i;
+    }
+
     public void lowerIntake()
     {
-        solenoidArm.set(DoubleSolenoid.Value.kForward);
+        solenoidArm.set(DoubleSolenoid.Value.kReverse);
     }
 
     public void raiseIntake()
     {
-        solenoidArm.set(DoubleSolenoid.Value.kReverse);
+        solenoidArm.set(DoubleSolenoid.Value.kForward);
     }
 
     public double ultrasonicDistance()
@@ -98,28 +112,33 @@ public class RobotTemplate extends SimpleRobot
     {
         if(throttle.getRawButton(1))
         {
-            setLeftSpeed(wheel.getAxis(Joystick.AxisType.kX));
-            setRightSpeed(wheel.getAxis(Joystick.AxisType.kX));
+            setLeftSpeed(swAdjust(-wheel.getAxis(Joystick.AxisType.kX)));
+            setRightSpeed(swAdjust(-wheel.getAxis(Joystick.AxisType.kX)));
         }
         else if(wheel.getAxis(Joystick.AxisType.kX) <= 0)
         {
-            setLeftSpeed(throttle.getRawAxis(2) + wheel.getAxis(Joystick.AxisType.kX));
+            setLeftSpeed(throttle.getRawAxis(2) * (1 + swAdjust(wheel.getAxis(Joystick.AxisType.kX))));
             setRightSpeed(-throttle.getRawAxis(2));
         }
         else
         {
-            setRightSpeed(-(throttle.getRawAxis(2) - wheel.getAxis(Joystick.AxisType.kX)));
+            setRightSpeed(-(throttle.getRawAxis(2) * (1 - swAdjust(wheel.getAxis(Joystick.AxisType.kX)))));
             setLeftSpeed(throttle.getRawAxis(2));
         }
     }
+    /*public void drive(){
+        
+     setLeftSpeed(xBox.getRawAxis(2));
+     setRightSpeed(-xBox.getRawAxis(5));
+     }*/
 
-    /*public void driveStraight()
-     {
-     setRightSpeed(-0.7);
-     setLeftSpeed(0.7);
-     }
-    
-     public void checkBattery()
+    public void driveStraight(double speed)
+    {
+        setRightSpeed(-speed);
+        setLeftSpeed(speed);
+    }
+
+    /* public void checkBattery()
      {
      if(driverStation.getBatteryVoltage() < 12)
      {
@@ -150,7 +169,105 @@ public class RobotTemplate extends SimpleRobot
      }
      }
      }*/
-   public void setLeftSpeed(double speed)
+    /*public void superDrive(double power, double direction)
+    {
+        double pCorrection;
+        double iCorrection;
+        double totalCorrection;
+        final double kP = 0.25, kI = 1.0;
+        //d was 0.25
+        direction = (direction) + gyro.getAngle();
+        //straightAngle = direction;
+        pCorrection = (-gyro.getRate()) * kP;
+        iCorrection = (direction - gyro.getAngle()) * kI;
+        totalCorrection = pCorrection + iCorrection;
+
+        totalCorrection /= 10;
+        if(totalCorrection > 1)
+        {
+            totalCorrection = 1;
+        }
+        else if(totalCorrection < -1)
+        {
+            totalCorrection = -1;
+        }
+        if(totalCorrection < 0)
+        {
+            setLeftSpeed(power * (1 - Math.abs(totalCorrection)));
+            setRightSpeed(-power);
+        }
+        else if(totalCorrection > 0)
+        {
+            setLeftSpeed(power);
+            setRightSpeed(-power * (1 - Math.abs(totalCorrection)));
+        }
+        else
+        {
+            setLeftSpeed(power);
+            setRightSpeed(-power);
+        }
+    }
+
+    public void wallDistance(final double distance)
+    {
+        final double kP = -0.125;
+
+        double cP;
+
+        double power;
+
+        double ultrasonicDistance;
+
+        double straightAngle;
+        double pCorrection;
+        double iCorrection;
+        double totalCorrection;
+        final double GkP = 0.25, GkI = 1.0;
+        straightAngle = gyro.getAngle();
+
+        while(isEnabled())
+        {
+            ultrasonicDistance = ultrasonicDistance();
+            cP = (distance - ultrasonicDistance) * kP;
+            power = 1.0 * cP;
+
+            pCorrection = (-gyro.getRate()) * GkP;
+            iCorrection = (straightAngle - gyro.getAngle()) * GkI;
+            totalCorrection = pCorrection + iCorrection;
+
+            totalCorrection /= 10;
+            if(totalCorrection > 1)
+            {
+                totalCorrection = 1;
+            }
+            else if(totalCorrection < -1)
+            {
+                totalCorrection = -1;
+            }
+            if(totalCorrection < 0)
+            {
+                setLeftSpeed(-power * (1 - Math.abs(totalCorrection)));
+                setRightSpeed(-power);
+            }
+            else if(totalCorrection > 0)
+            {
+                setLeftSpeed(-power);
+                setRightSpeed(-power * (1 - Math.abs(totalCorrection)));
+            }
+            else
+            {
+                bothSet(-power);
+            }
+            if(Math.abs(ultrasonicDistance - distance) < 0.25)
+            {
+                break;
+            }
+            bothSet(0);
+        }
+
+    }*/
+
+    public void setLeftSpeed(double speed)
     {
         leftDrive1.set(speed);
         leftDrive2.set(speed);
@@ -175,6 +292,18 @@ public class RobotTemplate extends SimpleRobot
         shooterTimer.start();
     }
 
+    public void checkBattery()
+    {
+        if(driverStation.getBatteryVoltage() < 12)
+        {
+            SmartDashboard.putBoolean("Replace Battery NOW", true);
+        }
+        else
+        {
+            SmartDashboard.putBoolean("Replace Battery NOW", false);
+        }
+    }
+
     public void windup()
     {
         if((solenoidShooter.get() == DoubleSolenoid.Value.kReverse) && !limCatapult.get())
@@ -183,9 +312,9 @@ public class RobotTemplate extends SimpleRobot
             {
                 windupTimer.start();
             }
-            catapault1.set(-(windupTimer.get() / 4));
-            catapault2.set(-(windupTimer.get()) / 4);
-            if(windupTimer.get() > 2)
+            catapault1.set(-(windupTimer.get() / 5)); //it was 4
+            catapault2.set(-(windupTimer.get()) / 5);
+            if(windupTimer.get() > 5)
             {
                 windupTimer.stop();
             }
@@ -200,108 +329,118 @@ public class RobotTemplate extends SimpleRobot
         }
     }
 
+    public void autonomous()
+    {
+        cameraLight.set(true);
+        compressor.start();
+        lowerIntake();
+        if(!driverStation.getDigitalIn(2))
+        {
+            autoTime.start();
+            driveStraight(0.4);
+            Timer.delay(1);
+            driveStraight(0);
+            //charge(14);
+            while(isAutonomous() && isEnabled())
+            {
+                if(vision.isHot || autoTime.get() > 5)
+                {
+                    solenoidShooter.set(DoubleSolenoid.Value.kForward);
+                    Timer.delay(1);
+                    solenoidShooter.set(DoubleSolenoid.Value.kReverse);
+                    break;
+                }
+            }
+            while(isAutonomous() && isEnabled())
+            {
+                windup();
+                /*straightDriveTimer.start();
+                 if(straightDriveTimer.get() < 1)
+                 {
+                 driveStraight(0.5);
+                 }
+                 else
+                 {
+                 setRightSpeed(0);
+                 setLeftSpeed(0);
+                 straightDriveTimer.stop();
+                 }
 
-    /*public void autonomous()
-     {
-     cameraLight.set(true);
-     compressor.start();
-     lowerIntake();
-     intake.set(0.2);
-     Timer.delay(0.2);
-     intake.set(0);
-     if(driverStation.getDigitalIn(2))
-     {
-     solenoidShooter.set(DoubleSolenoid.Value.kReverse);
-     Timer.delay(1);
-     solenoidShooter.set(DoubleSolenoid.Value.kForward);
-     while(isAutonomous() && isEnabled())
-     {
-     windup();
-     if(!limCatapult.get())
-     {
-     intake.set(0.5);
-     Timer.delay(0.5);
-     solenoidShooter.set(DoubleSolenoid.Value.kReverse);
-     Timer.delay(1);
-     solenoidShooter.set(DoubleSolenoid.Value.kForward);
-     break;
-     }
-     }
-     while(isAutonomous() && isEnabled())
-     {
-     windup();
-     straightDriveTimer.start();
-     if(straightDriveTimer.get() < 5)
-     {
-     driveStraight();
-     }
-     else
-     {
-     setRightSpeed(0);
-     setLeftSpeed(0);
-     straightDriveTimer.stop();
-     }
-     return;
-     }
-     autoTime.start();
-     //charge(14);
-     while(isAutonomous() && isEnabled())
-     {
-     if(vision.isHot)
-     {
-     solenoidShooter.set(DoubleSolenoid.Value.kReverse);
-     Timer.delay(1);
-     solenoidShooter.set(DoubleSolenoid.Value.kForward);
-     break;
-     }
-     if(autoTime.get() > 5)
-     {
-     solenoidShooter.set(DoubleSolenoid.Value.kReverse);
-     Timer.delay(1);
-     solenoidShooter.set(DoubleSolenoid.Value.kForward);
-     break;
-     }
-     }
-     while(isAutonomous() && isEnabled())
-     {
-     windup();
-     straightDriveTimer.start();
-     if(straightDriveTimer.get() < 5)
-     {
-     driveStraight();
-     }
-     else
-     {
-     setRightSpeed(0);
-     setLeftSpeed(0);
-     straightDriveTimer.stop();
-     }
-     }
-     straightDriveTimer.stop();
-     }
-     }
+                 straightDriveTimer.stop();*/
+            }
+        }
+        else //TO DO
+        {
+            intake.set(0.4);
+            Timer.delay(0.2);
+            intake.set(0);
+            driveStraight(0.4);
+            Timer.delay(1);
+            driveStraight(0);
+            solenoidShooter.set(DoubleSolenoid.Value.kForward);
+            Timer.delay(1);
+            solenoidShooter.set(DoubleSolenoid.Value.kReverse);
+            while(isAutonomous() && isEnabled())
+            {
 
-    
+                windup();
+                if(limCatapult.get())
+                {
+                    intake.set(0.5);
+                    Timer.delay(0.5);
+                    intake.set(0);
+                    solenoidShooter.set(DoubleSolenoid.Value.kForward);
+                    Timer.delay(1);
+                    solenoidShooter.set(DoubleSolenoid.Value.kReverse);
+                    break;
+                }
+            }
+            while(isAutonomous() && isEnabled())
+            {
+                windup();
+                /*straightDriveTimer.start();
+                if(straightDriveTimer.get() < 1)
+                {
+                    driveStraight(0.5);
+                }
+                else
+                {
+                    setRightSpeed(0);
+                    setLeftSpeed(0);
+                    straightDriveTimer.stop();
+                }*/
+                return;
+            }
+        }
 
-     /**
+    }
+
+    /**
      * This function is called once each time the robot enters operator control.
      */
     public void operatorControl()
     {
         compressor.start();
-        cameraLight.set(true);
         solenoidShooter.set(DoubleSolenoid.Value.kReverse); //Pulled in
-        solenoidArm.set(DoubleSolenoid.Value.kReverse); //Out
+        solenoidArm.set(DoubleSolenoid.Value.kForward); //In
         windupFlag = false;
-        /*autoTime.reset();
-         autoTime.stop();*/
+        catapault1.set(0);
+        catapault2.set(0);
+        autoTime.reset();
+         autoTime.stop();
         while(isOperatorControl() && isEnabled())
         {
-            if(xBox.getRawButton(6))
+            checkBattery();
+            if(MorseCode.isDone)
+            {
+                (new Thread(new MorseCode("SOS", cameraLight))).start();
+            }
+            // Swapped the lower and raise intake buttons first period 2/18. - Bonnie
+            if(xBox.getRawButton(5))
             {
                 lowerIntake();
             }
-            else if(xBox.getRawButton(5))
+            else if(xBox.getRawButton(6))
             {
                 raiseIntake();
             }
@@ -320,7 +459,9 @@ public class RobotTemplate extends SimpleRobot
             if(xBox.getRawButton(1))
             {
                 windupFlag = true;
-            }else if(xBox.getRawButton(2)){
+            }
+            else if(xBox.getRawButton(2))
+            {
                 windupFlag = false;
                 catapault1.set(0);
                 catapault2.set(0);
@@ -330,21 +471,24 @@ public class RobotTemplate extends SimpleRobot
                 windup();
             }
             SmartDashboard.putDouble("Joystick: ", throttle.getRawAxis(2));
-            SmartDashboard.putDouble("Wheel: ", wheel.getAxis(Joystick.AxisType.kX));
+            SmartDashboard.putDouble("Wheel: ", swAdjust(wheel.getAxis(Joystick.AxisType.kX)));
+            SmartDashboard.putDouble("Intake: ", xBox.getRawAxis(2));
             ultrasonicDistance();
             drive();
 
         }
+
+
+
+        /**
+         * This function is called once each time the robot enters test mode.
+         */
     }
 
-    /**
-     * This function is called once each time the robot enters test mode.
-     */
     public void test()
     {
     }
 }
-
 /*if(!limCatapult.get())
  {
  catapault1.set(-Math.abs(xBox.getRawAxis(5)));
@@ -368,7 +512,7 @@ public class RobotTemplate extends SimpleRobot
  {
  windup();
  }*/
-/*intake();
+/*
  if(xBox.getRawButton(2))
  {
  emergencyStop = true;

@@ -56,6 +56,7 @@ public class RobotTemplate extends SimpleRobot
     Timer autoTime = new Timer();
     VisionThingy vision = new VisionThingy();
     Timer straightDriveTimer = new Timer();
+    public final double MAX_MOTOR_POWER_FOR_COMPRESSION = 2;
     /*
      
      Gyro gyro = new Gyro(5, 2);
@@ -169,37 +170,35 @@ public class RobotTemplate extends SimpleRobot
      }
      }
      }*/
-    /*public void superDrive(double power, double direction)
+    public void superDrive(double power, double direction)
     {
-        double pCorrection;
-        double iCorrection;
-        double totalCorrection;
-        final double kP = 0.25, kI = 1.0;
-        //d was 0.25
-        direction = (direction) + gyro.getAngle();
-        //straightAngle = direction;
-        pCorrection = (-gyro.getRate()) * kP;
-        iCorrection = (direction - gyro.getAngle()) * kI;
-        totalCorrection = pCorrection + iCorrection;
 
-        totalCorrection /= 10;
-        if(totalCorrection > 1)
+        double iCorrection;
+        final double kI = 1.0;
+        //d was 0.25
+        //direction = (direction) + gyro.getAngle();
+        //straightAngle = direction;
+        //pCorrection = (-gyro.getRate()) * kP;
+        iCorrection = (direction) * kI;
+
+        iCorrection /= 10;
+        if(iCorrection > 1)
         {
-            totalCorrection = 1;
+            iCorrection = 1;
         }
-        else if(totalCorrection < -1)
+        else if(iCorrection < -1)
         {
-            totalCorrection = -1;
+            iCorrection = -1;
         }
-        if(totalCorrection < 0)
+        if(iCorrection < 0)
         {
-            setLeftSpeed(power * (1 - Math.abs(totalCorrection)));
+            setLeftSpeed(power * (1 - Math.abs(iCorrection)));
             setRightSpeed(-power);
         }
-        else if(totalCorrection > 0)
+        else if(iCorrection > 0)
         {
             setLeftSpeed(power);
-            setRightSpeed(-power * (1 - Math.abs(totalCorrection)));
+            setRightSpeed(-power * (1 - Math.abs(iCorrection)));
         }
         else
         {
@@ -217,20 +216,20 @@ public class RobotTemplate extends SimpleRobot
         double power;
 
         double ultrasonicDistance;
-
+/*
         double straightAngle;
         double pCorrection;
         double iCorrection;
         double totalCorrection;
         final double GkP = 0.25, GkI = 1.0;
         straightAngle = gyro.getAngle();
-
+*/
         while(isEnabled())
         {
             ultrasonicDistance = ultrasonicDistance();
             cP = (distance - ultrasonicDistance) * kP;
             power = 1.0 * cP;
-
+            /*
             pCorrection = (-gyro.getRate()) * GkP;
             iCorrection = (straightAngle - gyro.getAngle()) * GkI;
             totalCorrection = pCorrection + iCorrection;
@@ -258,14 +257,15 @@ public class RobotTemplate extends SimpleRobot
             {
                 bothSet(-power);
             }
+            * */
+            driveStraight(-power);
             if(Math.abs(ultrasonicDistance - distance) < 0.25)
             {
                 break;
             }
-            bothSet(0);
         }
-
-    }*/
+        driveStraight(0);
+    }
 
     public void setLeftSpeed(double speed)
     {
@@ -291,7 +291,19 @@ public class RobotTemplate extends SimpleRobot
         solenoidShooter.set(DoubleSolenoid.Value.kForward);
         shooterTimer.start();
     }
-
+    
+    public void compressorCheckThingy(boolean override)
+    {
+        if(override || ((Math.abs(leftDrive1.get()) + Math.abs(leftDrive2.get()) + Math.abs(leftDrive3.get()) + Math.abs(rightDrive1.get()) + Math.abs(rightDrive2.get()) + Math.abs(rightDrive3.get())) < MAX_MOTOR_POWER_FOR_COMPRESSION))
+        {
+            compressor.start();
+        }
+        else
+        {
+            compressor.stop();
+        }
+    }
+    
     public void checkBattery()
     {
         if(driverStation.getBatteryVoltage() < 12)
@@ -369,7 +381,7 @@ public class RobotTemplate extends SimpleRobot
                  straightDriveTimer.stop();*/
             }
         }
-        else //TO DO
+        else 
         {
             intake.set(0.4);
             Timer.delay(0.2);
@@ -420,6 +432,7 @@ public class RobotTemplate extends SimpleRobot
      */
     public void operatorControl()
     {
+        //boolean overrideCompressor = false;
         compressor.start();
         solenoidShooter.set(DoubleSolenoid.Value.kReverse); //Pulled in
         solenoidArm.set(DoubleSolenoid.Value.kForward); //In
@@ -427,7 +440,7 @@ public class RobotTemplate extends SimpleRobot
         catapault1.set(0);
         catapault2.set(0);
         autoTime.reset();
-         autoTime.stop();
+        autoTime.stop();
         while(isOperatorControl() && isEnabled())
         {
             checkBattery();
@@ -445,7 +458,7 @@ public class RobotTemplate extends SimpleRobot
                 raiseIntake();
             }
             intake();
-
+            SmartDashboard.putBoolean("Image: ", vision.isHot);
             if(throttle.getRawButton(2))
             {
                 fire();
@@ -470,9 +483,23 @@ public class RobotTemplate extends SimpleRobot
             {
                 windup();
             }
+            if(throttle.getRawButton(10)){
+                compressor.stop();
+                //overrideCompressor = !overrideCompressor;
+                
+            }else if(throttle.getRawButton(11)){
+                /*if(compressor.enabled()) {
+                    compressor.stop();
+                } else {
+                    compressor.start();
+                }*/
+                compressor.start();
+            }
+            //compressorCheckThingy(overrideCompressor);
             SmartDashboard.putDouble("Joystick: ", throttle.getRawAxis(2));
             SmartDashboard.putDouble("Wheel: ", swAdjust(wheel.getAxis(Joystick.AxisType.kX)));
             SmartDashboard.putDouble("Intake: ", xBox.getRawAxis(2));
+            SmartDashboard.putBoolean("Pressure Switch: ", compressor.getPressureSwitchValue());
             ultrasonicDistance();
             drive();
 

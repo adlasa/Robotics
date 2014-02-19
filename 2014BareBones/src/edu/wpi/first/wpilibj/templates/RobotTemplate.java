@@ -109,37 +109,27 @@ public class RobotTemplate extends SimpleRobot
         return ((ultrasonic.getVoltage()) * 3.47826087) - 0.25;
     }
 
-    /*public void drive()
-     {
-     setLeftSpeed(-xBox.getRawAxis(2));
-     setRightSpeed(xBox.getRawAxis(5));
-     }*/
+    public void drive()
+    {
+        if(throttle.getRawButton(1))
+        {
+            setLeftSpeed(swAdjust(-wheel.getAxis(Joystick.AxisType.kX)));
+            setRightSpeed(swAdjust(-wheel.getAxis(Joystick.AxisType.kX)));
+        }
+        else if(wheel.getAxis(Joystick.AxisType.kX) <= 0)
+        {
+            setLeftSpeed(throttle.getRawAxis(2) * (1 + swAdjust(wheel.getAxis(Joystick.AxisType.kX))));
+            setRightSpeed(-throttle.getRawAxis(2));
+        }
+        else
+        {
+            setRightSpeed(-(throttle.getRawAxis(2) * (1 - swAdjust(wheel.getAxis(Joystick.AxisType.kX)))));
+            setLeftSpeed(throttle.getRawAxis(2));
+        }
+    }
     /*
      public void drive()
      {
-     if(throttle.getRawButton(1))
-     {
-     setLeftSpeed(swAdjust(-wheel.getAxis(Joystick.AxisType.kX)));
-     setRightSpeed(swAdjust(-wheel.getAxis(Joystick.AxisType.kX)));
-     }
-     else if(wheel.getAxis(Joystick.AxisType.kX) <= 0)
-     {
-     setLeftSpeed(throttle.getRawAxis(2) * (1 + swAdjust(wheel.getAxis(Joystick.AxisType.kX))));
-     setRightSpeed(-throttle.getRawAxis(2));
-     }
-     else
-     {
-     setRightSpeed(-(throttle.getRawAxis(2) * (1 - swAdjust(wheel.getAxis(Joystick.AxisType.kX)))));
-     setLeftSpeed(throttle.getRawAxis(2));
-     }
-     }*/
-    public void drive()
-    {
-        setLeftSpeed(xBox.getRawAxis(2));
-        setRightSpeed(-xBox.getRawAxis(5));
-    }
-    /*public void drive(){
-        
      setLeftSpeed(xBox.getRawAxis(2));
      setRightSpeed(-xBox.getRawAxis(5));
      }*/
@@ -150,19 +140,7 @@ public class RobotTemplate extends SimpleRobot
         setLeftSpeed(speed);
     }
 
-    /* public void checkBattery()
-     {
-     if(driverStation.getBatteryVoltage() < 12)
-     {
-     SmartDashboard.putBoolean("Replace Battery NOW", true);
-     }
-     else
-     {
-     SmartDashboard.putBoolean("Replace Battery NOW", false);
-     }
-     }
-
-     /*public void charge(double distance)
+    /*public void charge(double distance)
      {
      double stable = 0;
      double speed = 0;
@@ -186,10 +164,6 @@ public class RobotTemplate extends SimpleRobot
 
         double iCorrection;
         final double kI = 1.0;
-        //d was 0.25
-        //direction = (direction) + gyro.getAngle();
-        //straightAngle = direction;
-        //pCorrection = (-gyro.getRate()) * kP;
         iCorrection = (direction) * kI;
 
         iCorrection /= 10;
@@ -227,48 +201,12 @@ public class RobotTemplate extends SimpleRobot
         double power;
 
         double ultrasonicDistance;
-        /*
-         double straightAngle;
-         double pCorrection;
-         double iCorrection;
-         double totalCorrection;
-         final double GkP = 0.25, GkI = 1.0;
-         straightAngle = gyro.getAngle();
-         */
+
         while(isEnabled())
         {
             ultrasonicDistance = ultrasonicDistance();
             cP = (distance - ultrasonicDistance) * kP;
             power = 1.0 * cP;
-            /*
-             pCorrection = (-gyro.getRate()) * GkP;
-             iCorrection = (straightAngle - gyro.getAngle()) * GkI;
-             totalCorrection = pCorrection + iCorrection;
-
-             totalCorrection /= 10;
-             if(totalCorrection > 1)
-             {
-             totalCorrection = 1;
-             }
-             else if(totalCorrection < -1)
-             {
-             totalCorrection = -1;
-             }
-             if(totalCorrection < 0)
-             {
-             setLeftSpeed(-power * (1 - Math.abs(totalCorrection)));
-             setRightSpeed(-power);
-             }
-             else if(totalCorrection > 0)
-             {
-             setLeftSpeed(-power);
-             setRightSpeed(-power * (1 - Math.abs(totalCorrection)));
-             }
-             else
-             {
-             bothSet(-power);
-             }
-             * */
             driveStraight(-power);
             if(Math.abs(ultrasonicDistance - distance) < 0.25)
             {
@@ -405,7 +343,6 @@ public class RobotTemplate extends SimpleRobot
             solenoidShooter.set(DoubleSolenoid.Value.kReverse);
             while(isAutonomous() && isEnabled())
             {
-
                 windup();
                 if(limCatapult.get())
                 {
@@ -455,12 +392,12 @@ public class RobotTemplate extends SimpleRobot
         while(isOperatorControl() && isEnabled())
         {
             checkBattery();
-            /*
+
             if(MorseCode.isDone)
             {
                 (new Thread(new MorseCode("SOS", cameraLight))).start();
             }
-            * */
+
             // Swapped the lower and raise intake buttons first period 2/18. - Bonnie
             if(xBox.getRawButton(5))
             {
@@ -520,12 +457,6 @@ public class RobotTemplate extends SimpleRobot
             drive();
 
         }
-
-
-
-        /**
-         * This function is called once each time the robot enters test mode.
-         */
     }
 
     public void test()

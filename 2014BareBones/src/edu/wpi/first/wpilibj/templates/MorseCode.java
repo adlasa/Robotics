@@ -17,9 +17,11 @@ public class MorseCode implements Runnable
     public static String sentance;
     public static String code[];
     public static Solenoid cameraLight;
+    public static boolean isDone = true;
 
     public MorseCode(String inputSentance, Solenoid light)
     {
+        isDone = false;
         code = new String[inputSentance.length()];
         sentance = inputSentance;
         cameraLight = light;
@@ -88,6 +90,7 @@ public class MorseCode implements Runnable
                 e.printStackTrace();
             }
         }
+        isDone = true;
     }
 
     private void convertToMorse()

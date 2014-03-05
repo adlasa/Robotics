@@ -481,6 +481,7 @@ public class RobotTemplate extends SimpleRobot
             SmartDashboard.putBoolean("Pressure Switch: ", compressor.getPressureSwitchValue());
             ultrasonicDistance();
             drive();
+            //superDrive(-throttle.getRawAxis(2), swAdjust(wheel.getAxis(Joystick.AxisType.kX)));
         }
     }
 

@@ -159,58 +159,6 @@ public class RobotTemplate extends SimpleRobot
      }
      }
      }*/
-    public void superDrive(double power, double direction)
-    {
-
-        double iCorrection;
-        final double kI = 1.0;
-        iCorrection = (direction) * kI;
-
-        iCorrection /= 10;
-        if(iCorrection > 1)
-        {
-            iCorrection = 1;
-        }
-        else if(iCorrection < -1)
-        {
-            iCorrection = -1;
-        }
-        if(iCorrection < 0)
-        {
-            setLeftSpeed(power * (1 - Math.abs(iCorrection)));
-            setRightSpeed(-power);
-        }
-        else if(iCorrection > 0)
-        {
-            setLeftSpeed(power);
-            setRightSpeed(-power * (1 - Math.abs(iCorrection)));
-        }
-        else
-        {
-            setLeftSpeed(power);
-            setRightSpeed(-power);
-        }
-    }
-
-    public void wallDistance(final double distance)
-    {
-        final double kP = -0.125;
-        double cP;
-        double power;
-        double ultrasonicDistance;
-        while(isEnabled())
-        {
-            ultrasonicDistance = ultrasonicDistance();
-            cP = (distance - ultrasonicDistance) * kP;
-            power = 1.0 * cP;
-            driveStraight(-power);
-            if(Math.abs(ultrasonicDistance - distance) < 0.25)
-            {
-                break;
-            }
-        }
-        driveStraight(0);
-    }
 
     public void setLeftSpeed(double speed)
     {
@@ -356,6 +304,8 @@ public class RobotTemplate extends SimpleRobot
                 windup();
                 if(limCatapult.get())
                 {
+                    catapault1.set(0);
+                    catapault2.set(0);
                     intake.set(0.5);
                     Timer.delay(0.5);
                     intake.set(0);
@@ -416,7 +366,7 @@ public class RobotTemplate extends SimpleRobot
             
             if(MorseCode.isDone)
             {
-                (new Thread(new MorseCode("SOS", cameraLight))).start();
+                (new Thread(new MorseCode("Hello", cameraLight))).start();
             }
 
             // Swapped the lower and raise intake buttons first period 2/18. - Bonnie

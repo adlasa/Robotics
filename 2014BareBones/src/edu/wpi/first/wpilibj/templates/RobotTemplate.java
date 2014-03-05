@@ -356,9 +356,9 @@ public class RobotTemplate extends SimpleRobot
         {
             checkBattery();
 
-            if(xBox.getRawButton(4)) {
+            if(xBox.getRawButton(4)) { //Button X
                 intake.set(0.35);
-            } else if (xBox.getRawButton(3)){
+            } else if (xBox.getRawButton(3)){ //Button Y
                 intake.set(.2675);
             } else {
                 intake();

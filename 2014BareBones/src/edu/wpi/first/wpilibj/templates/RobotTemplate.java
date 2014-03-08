@@ -91,17 +91,14 @@ public class RobotTemplate extends SimpleRobot
 
         double cP;
 
-        double power;
-
         double ultrasonicDistance;
 
         while((Math.abs(ultrasonicDistance() - distance) > 1) && isEnabled())
         {
             ultrasonicDistance = ultrasonicDistance();
             cP = (distance - ultrasonicDistance) * kP;
-            power = 1.0 * cP;
-            SmartDashboard.putDouble("power: ", power);
-            driveStraight(power);
+            SmartDashboard.putDouble("power: " , cP);
+            driveStraight(cP);
         }
 
     }
@@ -381,7 +378,6 @@ public class RobotTemplate extends SimpleRobot
         autoTime.reset();
         autoTime.stop();
         inputTimer.start();
-        wallDistance(1); //For testing deleate if not working
         while(isOperatorControl() && isEnabled())
         {
             checkBattery();

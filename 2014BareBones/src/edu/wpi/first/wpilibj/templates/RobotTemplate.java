@@ -31,6 +31,7 @@ public class RobotTemplate extends SimpleRobot
     /**
      * This function is called once each time the robot enters autonomous mode.
      */
+    //I love programming <3
     Joystick wheel = new Joystick(1);
     Joystick throttle = new Joystick(2);
     Joystick xBox = new Joystick(3);

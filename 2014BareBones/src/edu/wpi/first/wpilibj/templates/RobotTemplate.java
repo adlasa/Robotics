@@ -275,10 +275,6 @@ public class RobotTemplate extends SimpleRobot
         if(!driverStation.getDigitalIn(2))
         {
             autoTime.start();
-            setLeftSpeed(0.8);
-            setRightSpeed(-0.6);
-            Timer.delay(2);
-            driveStraight(0);
             lowerIntake();
             //vision.mainVision();
             Timer.delay(1);
@@ -293,6 +289,10 @@ public class RobotTemplate extends SimpleRobot
                     break;
                 }
             }
+            setLeftSpeed(0.8);
+            setRightSpeed(-0.6);
+            Timer.delay(2);
+            driveStraight(0);
             while(isAutonomous() && isEnabled())
             {
                 windup();

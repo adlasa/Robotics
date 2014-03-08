@@ -83,6 +83,7 @@ public class RobotTemplate extends SimpleRobot
 
      */
 
+    //45 inches from wall
     public void wallDistance(final double distance)
     {
         final double kP = -0.125;
@@ -93,11 +94,11 @@ public class RobotTemplate extends SimpleRobot
 
         double ultrasonicDistance;
 
-        while(isEnabled())
+        while((Math.abs(ultrasonicDistance() - distance) > 1) && isEnabled())
         {
             ultrasonicDistance = ultrasonicDistance();
             cP = (distance - ultrasonicDistance) * kP;
-            power = -1.0 * cP;
+            power = 1.0 * cP;
 
             driveStraight(power);
         }
@@ -279,6 +280,10 @@ public class RobotTemplate extends SimpleRobot
             //vision.mainVision();
             Timer.delay(1);
             //charge(14);
+            setLeftSpeed(0.7);
+            setRightSpeed(-0.65);
+            Timer.delay(1);
+            driveStraight(0);
             while(isAutonomous() && isEnabled())
             {
                 if(vision.isHot || autoTime.get() > 5)
@@ -289,10 +294,6 @@ public class RobotTemplate extends SimpleRobot
                     break;
                 }
             }
-            setLeftSpeed(0.8);
-            setRightSpeed(-0.6);
-            Timer.delay(2);
-            driveStraight(0);
             while(isAutonomous() && isEnabled())
             {
                 windup();
@@ -315,11 +316,8 @@ public class RobotTemplate extends SimpleRobot
         {
             lowerIntake();
             intake.set(0.4);
-            Timer.delay(0.5);
+            Timer.delay(0.4);
             intake.set(0);
-            driveStraight(0.4);
-            Timer.delay(2);
-            driveStraight(0);
             solenoidShooter.set(DoubleSolenoid.Value.kForward);
             Timer.delay(1);
             solenoidShooter.set(DoubleSolenoid.Value.kReverse);
@@ -331,7 +329,7 @@ public class RobotTemplate extends SimpleRobot
                     catapault1.set(0);
                     catapault2.set(0);
                     intake.set(0.5);
-                    Timer.delay(0.5);
+                    Timer.delay(1);
                     intake.set(0);
                     solenoidShooter.set(DoubleSolenoid.Value.kForward);
                     Timer.delay(1);
@@ -339,6 +337,10 @@ public class RobotTemplate extends SimpleRobot
                     break;
                 }
             }
+            setLeftSpeed(0.7);
+            setRightSpeed(-0.6);
+            Timer.delay(1);
+            driveStraight(0);
             while(isAutonomous() && isEnabled())
             {
                 windup();

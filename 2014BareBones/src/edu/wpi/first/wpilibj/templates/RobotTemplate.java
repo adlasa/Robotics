@@ -58,6 +58,7 @@ public class RobotTemplate extends SimpleRobot
     VisionThingy vision = new VisionThingy();
     Timer straightDriveTimer = new Timer();
     public final double MAX_MOTOR_POWER_FOR_COMPRESSION = 2;
+    boolean compressorOn = true;
     /*
      
      =======
@@ -284,7 +285,7 @@ public class RobotTemplate extends SimpleRobot
             setRightSpeed(-0.65);
             Timer.delay(1);
             driveStraight(0);
-            while(isAutonomous() && isEnabled())
+            /*while(isAutonomous() && isEnabled())
             {
                 if(vision.isHot || autoTime.get() > 5)
                 {
@@ -293,7 +294,7 @@ public class RobotTemplate extends SimpleRobot
                     solenoidShooter.set(DoubleSolenoid.Value.kReverse);
                     break;
                 }
-            }
+            }*/
             while(isAutonomous() && isEnabled())
             {
                 windup();
@@ -367,6 +368,7 @@ public class RobotTemplate extends SimpleRobot
     public void operatorControl()
     {
         //vision.mainVision();
+        
         Timer inputTimer = new Timer();
         boolean manualCompressorOn = false;
         boolean manualControl = false;
@@ -379,6 +381,7 @@ public class RobotTemplate extends SimpleRobot
         autoTime.reset();
         autoTime.stop();
         inputTimer.start();
+        //wallDistance(1); //For testing deleate if not working
         while(isOperatorControl() && isEnabled())
         {
             checkBattery();
@@ -393,7 +396,7 @@ public class RobotTemplate extends SimpleRobot
             
             if(MorseCode.isDone)
             {
-                (new Thread(new MorseCode("Dale", cameraLight))).start();
+                (new Thread(new MorseCode("Give Team 1458 Programming Cookies", cameraLight))).start();
             }
 
             // Swapped the lower and raise intake buttons first period 2/18. - Bonnie
@@ -430,24 +433,14 @@ public class RobotTemplate extends SimpleRobot
             {
                 windup();
             }
-            if(throttle.getRawButton(6))
-            {
-                manualControl = false;
+            if(driverStation.getBatteryVoltage() < 7.5 && compressorOn){
+                compressor.stop();
+                compressorOn = false;
+            }else if(driverStation.getBatteryVoltage() > 9.5 && !compressorOn){
+                compressor.start();
+                compressorOn = true;
             }
-            else if(throttle.getRawButton(7))
-            {
-                manualCompressorOn = false;
-            }
-            else if(throttle.getRawButton(10))
-            {
-                //compressor.stop();
-                manualCompressorOn = true;
-            }
-            else if(throttle.getRawButton(11))
-            {
-                manualControl = true;
-            }
-            compressorCheck(manualCompressorOn, manualControl);
+            
             SmartDashboard.putNumber("left drive 1 power",leftDrive1.get());
             SmartDashboard.putNumber("right drive 1 power",rightDrive1.get());
             SmartDashboard.putBoolean("Manual compressor state", manualCompressorOn);
@@ -505,3 +498,21 @@ public class RobotTemplate extends SimpleRobot
  emergencyStop = false;
  }
  }*/
+/* if(throttle.getRawButton(6))
+            {
+                manualControl = false;
+            }
+            else if(throttle.getRawButton(7))
+            {
+                manualCompressorOn = false;
+            }
+            else if(throttle.getRawButton(10))
+            {
+                //compressor.stop();
+                manualCompressorOn = true;
+            }
+            else if(throttle.getRawButton(11))
+            {
+                manualControl = true;
+            }
+            compressorCheck(manualCompressorOn, manualControl);*/

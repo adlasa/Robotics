@@ -100,7 +100,7 @@ public class RobotTemplate extends SimpleRobot
             ultrasonicDistance = ultrasonicDistance();
             cP = (distance - ultrasonicDistance) * kP;
             power = 1.0 * cP;
-
+            SmartDashboard.putDouble("power: ", power);
             driveStraight(power);
         }
 
@@ -381,7 +381,7 @@ public class RobotTemplate extends SimpleRobot
         autoTime.reset();
         autoTime.stop();
         inputTimer.start();
-        //wallDistance(1); //For testing deleate if not working
+        wallDistance(1); //For testing deleate if not working
         while(isOperatorControl() && isEnabled())
         {
             checkBattery();

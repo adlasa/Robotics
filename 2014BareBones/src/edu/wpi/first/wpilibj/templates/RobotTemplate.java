@@ -47,7 +47,7 @@ public class RobotTemplate extends SimpleRobot
     DoubleSolenoid solenoidArm = new DoubleSolenoid(2, 1, 2);
     Victor catapault1 = new Victor(8);
     Victor catapault2 = new Victor(9);
-    DigitalInput limCatapult = new DigitalInput(3);
+    DigitalInput limCatapult = new DigitalInput(4);
     DoubleSolenoid solenoidShooter = new DoubleSolenoid(2, 5, 6);
     DriverStation driverStation = DriverStation.getInstance();
     boolean windupFlag = false;
@@ -96,7 +96,7 @@ public class RobotTemplate extends SimpleRobot
         {
             ultrasonicDistance = ultrasonicDistance();
             cP = (distance - ultrasonicDistance) * kP;
-            power = 1.0 * cP;
+            power = -1.0 * cP;
 
             driveStraight(power);
         }
@@ -453,6 +453,7 @@ public class RobotTemplate extends SimpleRobot
             SmartDashboard.putNumber("Wheel: ", swAdjust(wheel.getAxis(Joystick.AxisType.kX)));
             SmartDashboard.putNumber("Intake: ", xBox.getRawAxis(2));
             SmartDashboard.putBoolean("Pressure Switch: ", compressor.getPressureSwitchValue());
+            SmartDashboard.putBoolean("Shooter Switch: ", limCatapult.get());
             ultrasonicDistance();
             drive();
             //superDrive(-throttle.getRawAxis(2), swAdjust(wheel.getAxis(Joystick.AxisType.kX)));

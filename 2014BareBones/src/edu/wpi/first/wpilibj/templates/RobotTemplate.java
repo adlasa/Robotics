@@ -31,7 +31,7 @@ public class RobotTemplate extends SimpleRobot
     /**
      * This function is called once each time the robot enters autonomous mode.
      */
-    //I love programming <3
+    //I love programming <3 && cookies
     Joystick wheel = new Joystick(1);
     Joystick throttle = new Joystick(2);
     Joystick xBox = new Joystick(3);
@@ -275,8 +275,8 @@ public class RobotTemplate extends SimpleRobot
         if(!driverStation.getDigitalIn(2))
         {
             autoTime.start();
-            setLeftSpeed(0.6);
-            setRightSpeed(-0.8);
+            setLeftSpeed(0.8);
+            setRightSpeed(-0.6);
             Timer.delay(2);
             driveStraight(0);
             lowerIntake();

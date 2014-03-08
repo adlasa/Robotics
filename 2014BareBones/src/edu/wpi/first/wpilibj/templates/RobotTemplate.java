@@ -82,6 +82,27 @@ public class RobotTemplate extends SimpleRobot
 
      */
 
+    public void wallDistance(final double distance)
+    {
+        final double kP = -0.125;
+
+        double cP;
+
+        double power;
+
+        double ultrasonicDistance;
+
+        while(isEnabled())
+        {
+            ultrasonicDistance = ultrasonicDistance();
+            cP = (distance - ultrasonicDistance) * kP;
+            power = 1.0 * cP;
+
+            driveStraight(power);
+        }
+
+    }
+    
     double swAdjust(double i)
     {
         //increase so bottom is 0
@@ -253,11 +274,12 @@ public class RobotTemplate extends SimpleRobot
         if(!driverStation.getDigitalIn(2))
         {
             autoTime.start();
-            driveStraight(0.4);
+            setLeftSpeed(0.6);
+            setRightSpeed(-0.8);
             Timer.delay(2);
             driveStraight(0);
             lowerIntake();
-            vision.mainVision();
+            //vision.mainVision();
             Timer.delay(1);
             //charge(14);
             while(isAutonomous() && isEnabled())
@@ -341,6 +363,7 @@ public class RobotTemplate extends SimpleRobot
      */
     public void operatorControl()
     {
+        //vision.mainVision();
         Timer inputTimer = new Timer();
         boolean manualCompressorOn = false;
         boolean manualControl = false;
@@ -367,7 +390,7 @@ public class RobotTemplate extends SimpleRobot
             
             if(MorseCode.isDone)
             {
-                (new Thread(new MorseCode("Hello", cameraLight))).start();
+                (new Thread(new MorseCode("Dale", cameraLight))).start();
             }
 
             // Swapped the lower and raise intake buttons first period 2/18. - Bonnie

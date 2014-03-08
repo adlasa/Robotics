@@ -49,6 +49,12 @@ public class VisionThingy
     boolean isHot;
     double[][] verticalTargetLocations;
     double[][] horizontalTargetLocations;
+    
+    public VisionThingy(){
+        camera = AxisCamera.getInstance();  // get an instance of the camera
+        cc = new CriteriaCollection();      // create the criteria for the particle filter
+        cc.addCriteria(NIVision.MeasurementType.IMAQ_MT_AREA, AREA_MINIMUM, 65535, false);
+    }
 
     public class Scores
     {
@@ -97,11 +103,13 @@ public class VisionThingy
              * "testImage.jpg"
              *
              */
+            
             ColorImage image;
             image = camera.getImage(); // comment if using stored image
+            image.write("/imageSasha.jpg"); //Delete if not working
             //ColorImage image;                           // next 2 lines read image from flash on cRIO
             //image = new RGBImage("/testImage.jpg");		// get the sample image from the cRIO flash
-            BinaryImage thresholdImage = image.thresholdHSV(116, 227, 0/*62*/, 255, 181, 254);   // keep only green objects
+            BinaryImage thresholdImage = image.thresholdHSV(0, 255, 0/*62*/, 255, 250, 255);   // keep only white objects
             //0,255,0,255,250,255-look for white
 
             thresholdImage.write("/threshold.bmp");

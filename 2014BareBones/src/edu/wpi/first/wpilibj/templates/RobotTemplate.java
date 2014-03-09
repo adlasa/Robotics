@@ -246,16 +246,18 @@ public class RobotTemplate extends SimpleRobot
     {
         if((solenoidShooter.get() == DoubleSolenoid.Value.kReverse) && !limCatapult.get())
         {
-            if(windupTimer.get() == 0)
+            /*if(windupTimer.get() == 0)
             {
                 windupTimer.start();
             }
-            catapault1.set(-(windupTimer.get() / 5)); //it was 4
-            catapault2.set(-(windupTimer.get()) / 5);
-            if(windupTimer.get() > 5)
+            catapault1.set(-(windupTimer.get() / 1)); //it was 4
+            catapault2.set(-(windupTimer.get() / 1));
+            if(windupTimer.get() > 1)
             {
                 windupTimer.stop();
-            }
+            }*/
+            catapault1.set(-1);
+            catapault2.set(-1);
         }
         else
         {
@@ -274,24 +276,24 @@ public class RobotTemplate extends SimpleRobot
         if(!driverStation.getDigitalIn(2))
         {
             autoTime.start();
-            lowerIntake();
-            //vision.mainVision();
-            Timer.delay(1);
+            lowerIntake(); 
+            vision.mainVision();
+            Timer.delay(1); 
             //charge(14);
-            setLeftSpeed(0.7);
-            setRightSpeed(-0.65);
-            Timer.delay(1);
-            driveStraight(0);
-            /*while(isAutonomous() && isEnabled())
+            while(isAutonomous() && isEnabled())
             {
                 if(vision.isHot || autoTime.get() > 5)
-                {
+                { 
                     solenoidShooter.set(DoubleSolenoid.Value.kForward);
                     Timer.delay(1);
                     solenoidShooter.set(DoubleSolenoid.Value.kReverse);
                     break;
                 }
-            }*/
+            }
+            setLeftSpeed(0.7);
+            setRightSpeed(-0.65);
+            Timer.delay(2);
+            driveStraight(0);
             while(isAutonomous() && isEnabled())
             {
                 windup();

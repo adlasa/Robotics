@@ -278,7 +278,7 @@ public class RobotTemplate extends SimpleRobot
             autoTime.start();
             lowerIntake(); 
             Timer.delay(1);
-            vision.mainVision();
+            //vision.mainVision();
             //charge(14);
             while(isAutonomous() && isEnabled())
             {

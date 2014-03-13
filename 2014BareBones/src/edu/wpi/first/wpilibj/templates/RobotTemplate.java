@@ -277,8 +277,8 @@ public class RobotTemplate extends SimpleRobot
         {
             autoTime.start();
             lowerIntake(); 
+            Timer.delay(1);
             vision.mainVision();
-            Timer.delay(1); 
             //charge(14);
             while(isAutonomous() && isEnabled())
             {
@@ -394,7 +394,7 @@ public class RobotTemplate extends SimpleRobot
             
             if(MorseCode.isDone)
             {
-                (new Thread(new MorseCode("Give Team 1458 Programming Cookies", cameraLight))).start();
+                (new Thread(new MorseCode("Hi", cameraLight))).start();
             }
 
             // Swapped the lower and raise intake buttons first period 2/18. - Bonnie

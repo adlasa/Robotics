@@ -122,7 +122,7 @@ public class VisionThingy
 
             //System.out.println(filteredImage.getNumberParticles());
             SmartDashboard.putInt("# Particles", filteredImage.getNumberParticles());
-
+            
             if(filteredImage.getNumberParticles() > 0)
             {
                 for(int i = 0; i < MAX_PARTICLES && i < filteredImage.getNumberParticles(); i++)

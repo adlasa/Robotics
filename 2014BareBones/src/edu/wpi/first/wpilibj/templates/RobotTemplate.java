@@ -197,7 +197,7 @@ public class RobotTemplate extends SimpleRobot
 
     public void intake()
     {
-        intake.set(xBox.getRawAxis(2) / 2);
+        intake.set(xBox.getRawAxis(2) / 1.33);
     }
 
     public void fire()

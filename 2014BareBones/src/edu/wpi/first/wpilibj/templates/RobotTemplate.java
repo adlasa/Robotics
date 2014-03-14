@@ -417,20 +417,7 @@ public class RobotTemplate extends SimpleRobot
                 shooterTimer.reset();
                 shooterTimer.stop();
             }
-            if(xBox.getRawButton(1))
-            {
-                windupFlag = true;
-            }
-            else if(xBox.getRawButton(2))
-            {
-                windupFlag = false;
-                catapault1.set(0);
-                catapault2.set(0);
-            }
-            if(windupFlag)
-            {
-                windup();
-            }
+            windup();
             if(driverStation.getBatteryVoltage() < 7.5 && compressorOn){
                 compressor.stop();
                 compressorOn = false;

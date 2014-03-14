@@ -394,7 +394,7 @@ public class RobotTemplate extends SimpleRobot
             
             if(MorseCode.isDone)
             {
-                (new Thread(new MorseCode("Hi", cameraLight))).start();
+                (new Thread(new MorseCode("Exterminate all cookie haters", cameraLight))).start();
             }
 
             // Swapped the lower and raise intake buttons first period 2/18. - Bonnie

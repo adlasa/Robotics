@@ -97,12 +97,12 @@ public class RobotTemplate extends SimpleRobot
         {
             ultrasonicDistance = ultrasonicDistance();
             cP = (distance - ultrasonicDistance) * kP;
-            SmartDashboard.putDouble("power: " , cP);
+            SmartDashboard.putDouble("power: ", cP);
             driveStraight(cP);
         }
 
     }
-    
+
     double swAdjust(double i)
     {
         //increase so bottom is 0
@@ -139,13 +139,39 @@ public class RobotTemplate extends SimpleRobot
         }
         else if(wheel.getAxis(Joystick.AxisType.kX) <= 0)
         {
-            setLeftSpeed(throttle.getRawAxis(2) * (1 + swAdjust(wheel.getAxis(Joystick.AxisType.kX))));
-            setRightSpeed(-throttle.getRawAxis(2));
+            //Older working version, no difference when reversed
+             setLeftSpeed(throttle.getRawAxis(2) * (1 + swAdjust(wheel.getAxis(Joystick.AxisType.kX))));
+             setRightSpeed(-throttle.getRawAxis(2));
+            /* 
+            if(throttle.getRawAxis(2) <= 0)
+            {
+                setLeftSpeed(throttle.getRawAxis(2) * (1 + swAdjust(wheel.getAxis(Joystick.AxisType.kX))));
+                setRightSpeed(-throttle.getRawAxis(2));
+            }
+            else
+            {
+                setRightSpeed(-throttle.getRawAxis(2) * (1 + swAdjust(wheel.getAxis(Joystick.AxisType.kX))));
+                setLeftSpeed(throttle.getRawAxis(2));
+            }
+*/
         }
         else
         {
-            setRightSpeed(-(throttle.getRawAxis(2) * (1 - swAdjust(wheel.getAxis(Joystick.AxisType.kX)))));
-            setLeftSpeed(throttle.getRawAxis(2));
+            //Older working version, no difference when reversed
+             setRightSpeed(-(throttle.getRawAxis(2) * (1 - swAdjust(wheel.getAxis(Joystick.AxisType.kX)))));
+             setLeftSpeed(throttle.getRawAxis(2));
+             
+            /*
+            if(throttle.getRawAxis(2) <= 0)
+            {
+                setRightSpeed(-throttle.getRawAxis(2) * (1 + swAdjust(wheel.getAxis(Joystick.AxisType.kX))));
+                setLeftSpeed(throttle.getRawAxis(2));
+            }
+            else
+            {
+                setLeftSpeed(throttle.getRawAxis(2) * (1 + swAdjust(wheel.getAxis(Joystick.AxisType.kX))));
+                setRightSpeed(-throttle.getRawAxis(2));
+            }*/
         }
     }
     /*
@@ -180,7 +206,6 @@ public class RobotTemplate extends SimpleRobot
      }
      }
      }*/
-
     public void setLeftSpeed(double speed)
     {
         leftDrive1.set(speed);
@@ -208,7 +233,7 @@ public class RobotTemplate extends SimpleRobot
 
     public void compressorCheck(boolean override, boolean manual)
     {
-        boolean compressorOn = Math.abs((leftDrive1.get()*3) - (-rightDrive1.get()*3)) < 1.5;
+        boolean compressorOn = Math.abs((leftDrive1.get() * 3) - (-rightDrive1.get() * 3)) < 1.5;
         if(manual)
         {
             if(override)
@@ -247,15 +272,15 @@ public class RobotTemplate extends SimpleRobot
         if((solenoidShooter.get() == DoubleSolenoid.Value.kReverse) && !limCatapult.get())
         {
             /*if(windupTimer.get() == 0)
-            {
-                windupTimer.start();
-            }
-            catapault1.set(-(windupTimer.get() / 1)); //it was 4
-            catapault2.set(-(windupTimer.get() / 1));
-            if(windupTimer.get() > 1)
-            {
-                windupTimer.stop();
-            }*/
+             {
+             windupTimer.start();
+             }
+             catapault1.set(-(windupTimer.get() / 1)); //it was 4
+             catapault2.set(-(windupTimer.get() / 1));
+             if(windupTimer.get() > 1)
+             {
+             windupTimer.stop();
+             }*/
             catapault1.set(-1);
             catapault2.set(-1);
         }
@@ -273,93 +298,120 @@ public class RobotTemplate extends SimpleRobot
     {
         cameraLight.set(true);
         compressor.start();
-        if(!driverStation.getDigitalIn(2))
-        {
-            autoTime.start();
-            lowerIntake(); 
-            Timer.delay(1);
-            //vision.mainVision();
-            //charge(14);
-            while(isAutonomous() && isEnabled())
-            {
-                if(vision.isHot || autoTime.get() > 5)
-                { 
-                    solenoidShooter.set(DoubleSolenoid.Value.kForward);
-                    Timer.delay(1);
-                    solenoidShooter.set(DoubleSolenoid.Value.kReverse);
-                    break;
-                }
-            }
-            setLeftSpeed(0.7);
-            setRightSpeed(-0.65);
-            Timer.delay(2);
-            driveStraight(0);
-            while(isAutonomous() && isEnabled())
-            {
-                windup();
-                /*straightDriveTimer.start();
-                 if(straightDriveTimer.get() < 1)
-                 {
-                 driveStraight(0.5);
-                 }
-                 else
-                 {
-                 setRightSpeed(0);
-                 setLeftSpeed(0);
-                 straightDriveTimer.stop();
-                 }
-
-                 straightDriveTimer.stop();*/
-            }
-        }
-        else
-        {
-            lowerIntake();
-            intake.set(0.4);
-            Timer.delay(0.4);
-            intake.set(0);
-            solenoidShooter.set(DoubleSolenoid.Value.kForward);
-            Timer.delay(1);
-            solenoidShooter.set(DoubleSolenoid.Value.kReverse);
-            while(isAutonomous() && isEnabled())
-            {
-                windup();
-                if(limCatapult.get())
-                {
-                    catapault1.set(0);
-                    catapault2.set(0);
-                    intake.set(0.5);
-                    Timer.delay(1);
-                    intake.set(0);
-                    solenoidShooter.set(DoubleSolenoid.Value.kForward);
-                    Timer.delay(1);
-                    solenoidShooter.set(DoubleSolenoid.Value.kReverse);
-                    break;
-                }
-            }
-            setLeftSpeed(0.7);
-            setRightSpeed(-0.6);
-            Timer.delay(1);
-            driveStraight(0);
-            while(isAutonomous() && isEnabled())
-            {
-                windup();
-                /*straightDriveTimer.start();
-                 if(straightDriveTimer.get() < 1)
-                 {
-                 driveStraight(0.5);
-                 }
-                 else
-                 {
-                 setRightSpeed(0);
-                 setLeftSpeed(0);
-                 straightDriveTimer.stop();
-                 }*/
-                return;
-            }
-        }
-
-    }
+        autoTime.start();
+        lowerIntake();
+        
+        driveStraight(0.75);
+        Timer.delay(0.75);
+        fire();
+        Timer.delay(0.25);
+        windup();
+        driveStraight(0);
+        driveStraight(-0.75);
+        Timer.delay(1);
+        driveStraight(0);
+                
+        
+        
+//        if(!driverStation.getDigitalIn(2))
+//        {
+//            autoTime.start();
+//            lowerIntake();
+//            Timer.delay(1);
+//            //vision.mainVision();
+//            //charge(14);
+//            /*Temp disabled for calgames
+//             * while(isAutonomous() && isEnabled())
+//            {
+//                //Hot goal, disabled for calgames
+//                if(vision.isHot || autoTime.get() > 5)
+//                {
+//                    solenoidShooter.set(DoubleSolenoid.Value.kForward);
+//                    Timer.delay(1);
+//                    solenoidShooter.set(DoubleSolenoid.Value.kReverse);
+//                    break;
+//                }
+//                
+//            }*/
+//            setLeftSpeed(0.39);
+//            setRightSpeed(-0.35);
+//            Timer.delay(1);
+//            solenoidShooter.set(DoubleSolenoid.Value.kForward);
+//            Timer.delay(1);
+//            solenoidShooter.set(DoubleSolenoid.Value.kReverse);
+//        
+//            setLeftSpeed(0.29);
+//            setRightSpeed(-0.26);
+//            Timer.delay(1);
+//            driveStraight(0);
+//            setRightSpeed(0);
+//            setLeftSpeed(0);
+//            while(isAutonomous() && isEnabled())
+//            {
+//                windup();
+//                /*straightDriveTimer.start();
+//                 if(straightDriveTimer.get() < 1)
+//                 {
+//                 driveStraight(0.5);
+//                 }
+//                 else
+//                 {
+//                 setRightSpeed(0);
+//                 setLeftSpeed(0);
+//                 straightDriveTimer.stop();
+//                 }
+//
+//                 straightDriveTimer.stop();*/
+//            }
+//        }
+//        else
+//        {
+//            lowerIntake();
+//            intake.set(0.4);
+//            Timer.delay(0.4);
+//            intake.set(0);
+//            solenoidShooter.set(DoubleSolenoid.Value.kForward);
+//            Timer.delay(1);
+//            solenoidShooter.set(DoubleSolenoid.Value.kReverse);
+//            while(isAutonomous() && isEnabled())
+//            {
+//                windup();
+//                if(limCatapult.get())
+//                {
+//                    catapault1.set(0);
+//                    catapault2.set(0);
+//                    intake.set(0.5);
+//                    Timer.delay(1);
+//                    intake.set(0);
+//                    solenoidShooter.set(DoubleSolenoid.Value.kForward);
+//                    Timer.delay(1);
+//                    solenoidShooter.set(DoubleSolenoid.Value.kReverse);
+//                    break;
+//                }
+//            }
+//            setLeftSpeed(0.7);
+//            setRightSpeed(-0.6);
+//            Timer.delay(1);
+//            driveStraight(0);
+//            while(isAutonomous() && isEnabled())
+//            {
+//                windup();
+//                /*straightDriveTimer.start();
+//                 if(straightDriveTimer.get() < 1)
+//                 {
+//                 driveStraight(0.5);
+//                 }
+//                 else
+//                 {
+//                 setRightSpeed(0);
+//                 setLeftSpeed(0);
+//                 straightDriveTimer.stop();
+//                 }*/
+//                return;
+//            }
+//        }
+//
+      }
 
     /**
      * This function is called once each time the robot enters operator control.
@@ -367,14 +419,15 @@ public class RobotTemplate extends SimpleRobot
     public void operatorControl()
     {
         //vision.mainVision();
-        
+
         Timer inputTimer = new Timer();
         boolean manualCompressorOn = false;
-        boolean manualControl = false;
+        boolean manualControl = true;
         compressor.start();
         solenoidShooter.set(DoubleSolenoid.Value.kReverse); //Pulled in
         solenoidArm.set(DoubleSolenoid.Value.kForward); //In
         windupFlag = false;
+
         catapault1.set(0);
         catapault2.set(0);
         autoTime.reset();
@@ -384,18 +437,24 @@ public class RobotTemplate extends SimpleRobot
         {
             checkBattery();
 
-            if(xBox.getRawButton(4)) { //Button X
+            if(xBox.getRawButton(4))
+            { //Button X
                 intake.set(0.35);
-            } else if (xBox.getRawButton(3)){ //Button Y
+            }
+            else if(xBox.getRawButton(3))
+            { //Button Y
                 intake.set(.2675);
-            } else {
+            }
+            else
+            {
                 intake();
             }
-            
-            if(MorseCode.isDone)
-            {
-                (new Thread(new MorseCode("Exterminate all cookie haters", cameraLight))).start();
-            }
+
+            /*Sasha's morse code thingy
+             * if(MorseCode.isDone)
+             {
+             (new Thread(new MorseCode("Exterminate all cookie haters", cameraLight))).start();
+             }*/
 
             // Swapped the lower and raise intake buttons first period 2/18. - Bonnie
             if(xBox.getRawButton(5))
@@ -407,6 +466,8 @@ public class RobotTemplate extends SimpleRobot
                 raiseIntake();
             }
             SmartDashboard.putBoolean("Image: ", vision.isHot);
+
+
             if(throttle.getRawButton(2))
             {
                 fire();
@@ -418,16 +479,20 @@ public class RobotTemplate extends SimpleRobot
                 shooterTimer.stop();
             }
             windup();
-            if(driverStation.getBatteryVoltage() < 7.5 && compressorOn){
+
+            if(driverStation.getBatteryVoltage() < 7.5 && compressorOn)
+            {
                 compressor.stop();
                 compressorOn = false;
-            }else if(driverStation.getBatteryVoltage() > 9.5 && !compressorOn){
+            }
+            else if(driverStation.getBatteryVoltage() > 9.5 && !compressorOn)
+            {
                 compressor.start();
                 compressorOn = true;
             }
-            
-            SmartDashboard.putNumber("left drive 1 power",leftDrive1.get());
-            SmartDashboard.putNumber("right drive 1 power",rightDrive1.get());
+
+            SmartDashboard.putNumber("left drive 1 power", leftDrive1.get());
+            SmartDashboard.putNumber("right drive 1 power", rightDrive1.get());
             SmartDashboard.putBoolean("Manual compressor state", manualCompressorOn);
             SmartDashboard.putBoolean("Manual control enabled", manualControl);
             SmartDashboard.putNumber("Joystick: ", throttle.getRawAxis(2));
@@ -443,7 +508,6 @@ public class RobotTemplate extends SimpleRobot
 
     public void test()
     {
-        
     }
 }
 /*if(!limCatapult.get())
@@ -484,20 +548,20 @@ public class RobotTemplate extends SimpleRobot
  }
  }*/
 /* if(throttle.getRawButton(6))
-            {
-                manualControl = false;
-            }
-            else if(throttle.getRawButton(7))
-            {
-                manualCompressorOn = false;
-            }
-            else if(throttle.getRawButton(10))
-            {
-                //compressor.stop();
-                manualCompressorOn = true;
-            }
-            else if(throttle.getRawButton(11))
-            {
-                manualControl = true;
-            }
-            compressorCheck(manualCompressorOn, manualControl);*/
+ {
+ manualControl = false;
+ }
+ else if(throttle.getRawButton(7))
+ {
+ manualCompressorOn = false;
+ }
+ else if(throttle.getRawButton(10))
+ {
+ //compressor.stop();
+ manualCompressorOn = true;
+ }
+ else if(throttle.getRawButton(11))
+ {
+ manualControl = true;
+ }
+ compressorCheck(manualCompressorOn, manualControl);*/

@@ -40,11 +40,7 @@ public class VisionThingy
     AxisCamera camera;          // the axis camera object (connected to the switch)
     CriteriaCollection cc;      // the criteria for doing the particle filter operation
 
-    TargetReport target = new TargetReport();
-    int verticalTargets[] = new int[MAX_PARTICLES];
-    int horizontalTargets[] = new int[MAX_PARTICLES];
-    int verticalTargetCount, horizontalTargetCount;
-    
+  
     double distance;
     boolean isHot;
     double[][] verticalTargetLocations;
@@ -93,6 +89,11 @@ public class VisionThingy
     
     public void mainVision()
     {
+        TargetReport target = new TargetReport();
+        int verticalTargets[] = new int[MAX_PARTICLES];
+        int horizontalTargets[] = new int[MAX_PARTICLES];
+        int verticalTargetCount, horizontalTargetCount;
+    
         try
         {
             /**

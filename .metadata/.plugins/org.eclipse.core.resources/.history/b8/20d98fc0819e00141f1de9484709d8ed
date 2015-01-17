@@ -1,0 +1,61 @@
+
+package org.usfirst.frc.team1458.robot;
+
+
+import edu.wpi.first.wpilibj.SampleRobot;
+import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.Talon;
+import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
+
+public class Robot extends SampleRobot {
+	Joystick right = new Joystick(0);
+	Joystick left = new Joystick(1);
+	Talon rightDriveFront = new Talon(3);
+	Talon rightDriveRear = new Talon(2);
+	Talon leftDriveFront = new Talon(1);
+	Talon leftDriveRear = new Talon(0);
+    
+    public Robot() {
+    
+    }
+
+    /**
+     * Autonomous mode
+     */
+    public void autonomous() {
+    
+    }
+
+    /**
+     * operator controlled mode
+     */
+    public void operatorControl() {
+    	double lDp;
+    	double rDp;
+    	
+    	while(isEnabled()) {
+    		lDp = -left.getRawAxis(1);
+    		rDp = -right.getRawAxis(1);
+    		
+    		rightDriveFront.set(rDp);
+    		rightDriveRear.set(-right.getRawAxis(1));
+    		leftDriveFront.set(-left.getRawAxis(1));
+    		leftDriveRear.set(-left.getRawAxis(1));
+    		
+    		System.out.println("Right: " + -right.getRawAxis(1));
+    		SmartDashboard.putNumber("Right: ", -right.getRawAxis(1));
+    		
+    		System.out.println("Left: " + -left.getRawAxis(1));
+    		SmartDashboard.putNumber("Left: ", -left.getRawAxis(1));
+    	}
+    }
+
+    /**
+     * Runs during test mode
+     */
+    public void test() {
+    	
+    }
+}

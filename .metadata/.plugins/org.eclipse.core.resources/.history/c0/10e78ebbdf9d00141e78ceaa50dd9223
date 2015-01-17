@@ -1,0 +1,38 @@
+public class mathTest2 {
+
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+		double gyroAngle = 0;
+		double y;
+		double x;
+		double m;
+		double lFp;
+		double rFp;
+		double lRp;
+		double rRp;
+		double xa;
+		double ya;
+		double angle;
+		double adjustAngle = Math.PI / 4;
+		double righty = 0;
+		double rightx = 0;
+		y = righty;
+		x = rightx;
+		m = Math.sqrt(x * x + y * y);
+		if (m == 0) {
+			m = 0.000000000001;
+		}
+		angle = angle-gyroAngle;
+		lFp=sin();
+		
+		
+		
+		System.out.println("Left Front: "+lFp);
+		System.out.println("Right Front: "+rFp);
+		System.out.println("Left Rear: "+lRp);
+		System.out.println("Right Rear: "+rRp);
+		
+
+	}
+
+}

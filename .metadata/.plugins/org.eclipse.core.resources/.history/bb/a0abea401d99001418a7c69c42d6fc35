@@ -1,0 +1,38 @@
+
+package org.usfirst.frc.team1458.robot;
+
+
+import edu.wpi.first.wpilibj.SampleRobot;
+import edu.wpi.first.wpilibj.RobotDrive;
+import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.Timer;
+
+
+public class Robot extends SampleRobot {
+	
+    
+    public Robot() {
+    
+    }
+
+    /**
+     * Autonomous mode
+     */
+    public void autonomous() {
+    
+    }
+
+    /**
+     * operator controlled mode
+     */
+    public void operatorControl() {
+    	
+    }
+
+    /**
+     * Runs during test mode
+     */
+    public void test() {
+    	
+    }
+}

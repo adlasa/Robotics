@@ -47,18 +47,17 @@ public class Robot extends SampleRobot {
     	
     	while(isEnabled()) {
     		
-    		lDp = left.getRawAxis(0);
-    		rDp = -(right.getRawAxis(0));
+    		lDp = -left.getRawAxis(1);
+    		rDp = -(-right.getRawAxis(1));
     		//cDp = (left.getRawAxis(0)+right.getRawAxis(0))/2;
     		cDp = xbox.getRawAxis(4);
-    		/*
-    		if(Math.abs(lDp)<=0.25) {
+    		if(Math.abs(lDp)<=0.2) {
     			lDp=0;
     		}
-    		if(Math.abs(rDp)<=0.25) {
+    		if(Math.abs(rDp)<=0.2) {
     			rDp=0;
     		}
-    		*/
+    		
     		rightDriveFront.set(rDp);
     		rightDriveRear.set(rDp);
     		leftDriveFront.set(lDp);

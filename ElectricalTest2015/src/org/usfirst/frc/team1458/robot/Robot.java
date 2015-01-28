@@ -44,11 +44,9 @@ public class Robot extends SampleRobot {
     	double rDp=0;//right Drive power
     	double cDp=0;//centre Drive power
     	
-    	
     	while(isEnabled()) {
-    		
-    		lDp = left.getRawAxis(0);
-    		rDp = -(right.getRawAxis(0));
+    		lDp = -left.getY();
+    		rDp = -(-right.getY());
     		//cDp = (left.getRawAxis(0)+right.getRawAxis(0))/2;
     		cDp = xbox.getRawAxis(4);
     		/*

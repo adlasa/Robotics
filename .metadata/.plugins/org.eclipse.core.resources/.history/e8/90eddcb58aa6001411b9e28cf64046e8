@@ -1,0 +1,45 @@
+package org.usfirst.frc.team1458.robot;
+
+import edu.wpi.first.wpilibj.AnalogInput;
+import edu.wpi.first.wpilibj.I2C;
+import edu.wpi.first.wpilibj.I2C.Port;
+import edu.wpi.first.wpilibj.SensorBase;
+import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.communication.UsageReporting;
+import edu.wpi.first.wpilibj.livewindow.LiveWindow;
+import edu.wpi.first.wpilibj.livewindow.LiveWindowSendable;
+import edu.wpi.first.wpilibj.tables.ITable;
+import edu.wpi.first.wpilibj.util.BoundaryException;
+import edu.wpi.first.wpilibj.AccumulatorResult;
+
+public class Infrared extends edu.wpi.first.wpilibj.SensorBase {
+	private double rate;
+	private double distance;
+	AnalogInput analogInput;
+
+	public Infrared(int i) {
+		
+	}
+
+	
+	public void update() {
+
+		m_i2c.read(0x21, 2, rawInput);
+		// convert it into number format
+		int i = (int) rawInput[0];
+		i *= 256;
+		i += (int) rawInput[1];
+		rate = (0.8) * rateAdjust(i) + (0.2) * rate;
+
+		accum.update(rate, timer.get());
+		timer.reset();
+	}
+
+	public double rateAdjust(int i) {
+		return (((double) i) - 1.81347822) / 16.384;// old was 3.584,16.66666;
+													// next was
+													// 1.5015,8.93879626, then
+													// 1.11951544, then
+													// 0.058795502
+	}
+}

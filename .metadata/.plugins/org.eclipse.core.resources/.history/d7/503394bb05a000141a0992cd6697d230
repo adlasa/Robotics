@@ -1,0 +1,115 @@
+
+package org.usfirst.frc.team1458.robot;
+
+
+import edu.wpi.first.wpilibj.Encoder;
+import edu.wpi.first.wpilibj.SampleRobot;
+import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.Talon;
+import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
+
+public class Robot extends SampleRobot {
+	Joystick right = new Joystick(0);
+	Joystick left = new Joystick(1);
+	Joystick xbox = new Joystick(2);
+	Talon rightDriveFront = new Talon(1);
+	Talon rightDriveRear = new Talon(0);
+	Talon leftDriveFront = new Talon(3);
+	Talon leftDriveRear = new Talon(2);
+	Talon centreDrive = new Talon(4);
+	double[] lErrorLog;
+	double[] rErrorLog;
+	
+	/*
+	Encoder leftEncoder = new Encoder(0,1);
+	Encoder rightEncoder = new Encoder(2,3);
+    */
+    
+    public Robot() {
+    
+    }
+
+    /**
+     * Autonomous mode
+     */
+    public void autonomous() {
+    
+    }
+
+    /**
+     * operator controlled mode
+     */
+    public void operatorControl() {
+    	double lDp=0;//left Drive power
+    	double rDp=0;//right Drive power
+    	double cDp=0;//centre Drive power
+    	int timerCount = 0;
+    	int lErrorCount = 0;
+    	int rErrorCount = 0;
+    	double lAverageError = 0.0;
+    	double rAverageError = 0.0;
+    	
+		lDp = -left.getY();
+		rDp = -(-right.getY());
+	
+    	
+    	while(isEnabled()) {
+    		if (timerCount%1000==0) {
+        		if(Math.abs(lDp)<=0.10) {
+        			lErrorLog[lErrorCount]=Math.abs(lDp);
+        		}
+        		if(Math.abs(rDp)<=0.10) {
+        			rErrorLog[rErrorCount]=Math.abs(rDp);
+        		}
+        		for(int i = 0; i<lErrorLog.length; i++)
+        		System.out.println("Right: " + rDp);
+        		SmartDashboard.putNumber("Right: ", rDp);
+        		
+    		}
+    		timerCount++;
+    		
+
+    		//cDp = (left.getRawAxis(0)+right.getRawAxis(0))/2;
+    		cDp = xbox.getRawAxis(4);
+    		/*
+    		if(Math.abs(lDp)<=0.25) {
+    			lDp=0;
+    		}
+    		if(Math.abs(rDp)<=0.25) {
+    			rDp=0;
+    		}
+    		*/
+    		rightDriveFront.set(rDp);
+    		rightDriveRear.set(rDp);
+    		leftDriveFront.set(lDp);
+    		leftDriveRear.set(lDp);
+    		centreDrive.set(cDp);
+    		
+    		System.out.println("Right: " + rDp);
+    		SmartDashboard.putNumber("Right: ", rDp);
+    		
+    		System.out.println("Left: " + lDp);
+    		SmartDashboard.putNumber("Left: ", lDp);
+    		
+    		System.out.println("Centre: "+cDp);
+    		SmartDashboard.putNumber("Centre:",cDp);
+    		
+    		/*
+    		System.out.println("Right encoder: "+rightEncoder.getRaw());
+    		SmartDashboard.putNumber("Right encoder: ",rightEncoder.getRaw());
+    		
+    		System.out.println("Left encoder: "+leftEncoder.getRaw());
+    		SmartDashboard.putNumber("Left encoder: ",leftEncoder.getRaw());
+    		*/
+    	}
+    }
+
+    /**
+     * Runs during test mode
+     */
+    public void test() {
+    	
+    }
+}

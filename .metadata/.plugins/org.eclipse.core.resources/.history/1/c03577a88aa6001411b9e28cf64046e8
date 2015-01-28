@@ -1,0 +1,83 @@
+package org.usfirst.frc.team1458.robot;
+
+import edu.wpi.first.wpilibj.I2C;
+import edu.wpi.first.wpilibj.I2C.Port;
+import edu.wpi.first.wpilibj.SensorBase;
+import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.communication.UsageReporting;
+import edu.wpi.first.wpilibj.livewindow.LiveWindow;
+import edu.wpi.first.wpilibj.livewindow.LiveWindowSendable;
+import edu.wpi.first.wpilibj.tables.ITable;
+import edu.wpi.first.wpilibj.util.BoundaryException;
+import edu.wpi.first.wpilibj.AccumulatorResult;
+
+public class Infrared extends edu.wpi.first.wpilibj.SensorBase {
+	private double rate;
+	private double distance;
+
+	public Infrared(int i) {
+		
+	}
+
+	/**
+	 * Reset the gyro. Resets the gyro to a heading of zero. This can be used if
+	 * there is significant drift in the gyro and it needs to be recalibrated
+	 * after it has been running.
+	 */
+	public void reset() {
+		accum.reset();
+		update();
+	}
+
+	/**
+	 * Return the actual angle in degrees that the robot is currently facing.
+	 *
+	 * The angle is based on the current accumulator value corrected by the
+	 * oversampling rate, the gyro type, and the A/D calibration values. The
+	 * angle is continuous, that is can go beyond 360 degrees. This make
+	 * algorithms that wouldn't want to see a discontinuity in the gyro output
+	 * as it sweeps past 0 on the second time around.
+	 *
+	 * @return the current heading of the robot in degrees. This heading is
+	 *         based on integration of the returned rate from the gyro.
+	 */
+	public double getAngle() {
+		update();
+		// do math stuff to make more accurate;
+		return accum.sum;
+	}
+
+	/**
+	 * Return the rate of rotation of the gyro
+	 * 
+	 * The rate is based on the most recent reading of the gyro analog value
+	 * 
+	 * @return the current rate in degrees per second
+	 */
+	public double getRate() {
+
+		update();
+		return rate;
+	}
+
+	public void update() {
+
+		m_i2c.read(0x21, 2, rawInput);
+		// convert it into number format
+		int i = (int) rawInput[0];
+		i *= 256;
+		i += (int) rawInput[1];
+		rate = (0.8) * rateAdjust(i) + (0.2) * rate;
+
+		accum.update(rate, timer.get());
+		timer.reset();
+	}
+
+	public double rateAdjust(int i) {
+		return (((double) i) - 1.81347822) / 16.384;// old was 3.584,16.66666;
+													// next was
+													// 1.5015,8.93879626, then
+													// 1.11951544, then
+													// 0.058795502
+	}
+}

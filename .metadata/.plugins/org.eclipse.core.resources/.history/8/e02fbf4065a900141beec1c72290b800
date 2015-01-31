@@ -1,0 +1,12 @@
+package org.usfirst.frc.team1458.robot;
+
+public class LED {
+	private byte r;
+	private byte g;
+	private byte b;
+	LED() {
+		
+	}
+	
+
+}

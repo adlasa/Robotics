@@ -1,0 +1,16 @@
+package org.usfirst.frc.team1458.robot;
+
+public class Elevator {
+	
+	
+	//Elevator.Level.ONE.TOTE.CARRY
+	//LIP=lip of tote
+	//CARRY= carry level
+	//PLACE = placing level
+	Levels.MainLevel mainLevel = Levels.MainLevel.ONE;
+	Levels.CarryObject carryObject = Levels.CarryObject.TOTE;
+	Levels.LevelMode levelMode = Levels.LevelMode.FLOOR;
+	Levels.LevelMod levelMod = Levels.LevelMod.LIP;
+	
+
+}

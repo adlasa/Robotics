@@ -1,0 +1,48 @@
+package org.usfirst.frc.team1458.robot;
+
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
+public class Elevator {
+	
+	
+	//Elevator.Level.ONE.TOTE.CARRY
+	//LIP=lip of tote
+	//CARRY= carry level
+	//PLACE = placing level
+	Levels.MainLevel mainLevel = Levels.MainLevel.ONE;
+	Levels.CarryObject carryObject = Levels.CarryObject.TOTE;
+	Levels.LevelMode levelMode = Levels.LevelMode.FLOOR;
+	Levels.LevelMod levelMod = Levels.LevelMod.LIP;
+	
+	public void setMainLevel(Levels.MainLevel mainLevel) {
+		this.mainLevel = mainLevel;
+	}
+	
+	public void update() {
+		
+	}
+	
+	if(buttonPanel.getRawButton(1)) {
+		mainLevel = Levels.MainLevel.ONE;
+	} else if (buttonPanel.getRawButton(2)) {
+		mainLevel = Levels.MainLevel.TWO;
+	}
+	
+	if(buttonPanel.getRawButton(5)) {
+		levelMode = Levels.LevelMode.FLOOR;
+		
+	} else if (buttonPanel.getRawButton(6)) {
+		levelMode = Levels.LevelMode.STEP;
+	}
+	
+	if(buttonPanel.getRawButton(8)) {
+		carryObject = Levels.CarryObject.TOTE;
+	} else if (buttonPanel.getRawButton(9)) {
+		carryObject = Levels.CarryObject.CONTAINER;
+	}
+	
+	elevatorHeight=levelHandler.getHeight(mainLevel, levelMode, carryObject, levelMod);
+	SmartDashboard.putNumber("elevatorHeight", elevatorHeight);
+	
+
+}

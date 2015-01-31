@@ -2,7 +2,13 @@
 package org.usfirst.frc.team1458.robot;
 
 
+import org.usfirst.frc.team1458.robot.Levels.CarryObject;
+import org.usfirst.frc.team1458.robot.Levels.LevelMod;
+import org.usfirst.frc.team1458.robot.Levels.LevelMode;
+import org.usfirst.frc.team1458.robot.Levels.MainLevel;
+
 import edu.wpi.first.wpilibj.Encoder;
+import edu.wpi.first.wpilibj.PowerDistributionPanel;
 import edu.wpi.first.wpilibj.SampleRobot;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Talon;
@@ -15,42 +21,31 @@ import edu.wpi.first.wpilibj.Gyro;
 public class Robot extends SampleRobot {
 	Joystick right = new Joystick(0);
 	Joystick left = new Joystick(1);
-	Joystick buttonPanel = new Joystick(2);
-	//Casement/David input stuff
-	Victor rightDriveFront = new Victor(1);
-	Victor rightDriveRear = new Victor(0);
-	Victor leftDriveFront = new Victor(3);
-	Victor leftDriveRear = new Victor(2);
-	Talon centreDrive = new Talon(4);
-	Talon arm1 = new Talon(5);
-	Talon arm2 = new Talon(6);
-	Talon elevator = new Talon(7);
-	
+	Joystick buttonPanel = new Joystick(2);	
 	
 	Encoder leftEncoder = new Encoder(0,1);//need proper channels
 	Encoder rightEncoder = new Encoder(2,3);//need proper channels
 	
-	
-	
 	I2CGyro gyro = new I2CGyro();
 	
-	Infrared elevatorBottom = new Infrared(0);
-	Infrared elevatorTop = new Infrared(1);
-	Infrared toteCheck = new Infrared(2);
-	Infrared seeRight = new Infrared(3);
-	Infrared seeLeft = new Infrared(4);
+	Infrared elevatorBottom = new Infrared(0,1);
+	Infrared elevatorTop = new Infrared(1,1);
+	Infrared toteCheck = new Infrared(2,2);
+	Infrared seeRight = new Infrared(3,1);
+	Infrared seeLeft = new Infrared(4,1);
 
 	LED ledStrip = new LED();
+	
+	Levels levelHandler = new Levels();
+	
+	PowerDistributionPanel pdp = new PowerDistributionPanel();
     
     public Robot() {
+    	//initialise all of the things, for the elevator, robotfunctions, gyro, etc.
+    	RobotFunctions robot = new RobotFunctions();
+    	Elevator elevator = new Elevator();
     
     }
-    /*
-    public double ultrasonicDistance()
-    {
-        SmartDashboard.putDouble("Ultrasonic Distance", (ultrasonic.getVoltage() * 3.47826087) - 0.25);
-    }
-    */
 
     /**
      * Autonomous mode
@@ -68,10 +63,19 @@ public class Robot extends SampleRobot {
     	gyro.update();
     	double gyroAngle;
     	double gyroRate;
-    	/*
+    	
+    	double elevatorHeight;
+    	
+    	Levels.MainLevel mainLevel = Levels.MainLevel.ONE;
+    	Levels.CarryObject carryObject = Levels.CarryObject.TOTE;
+    	Levels.LevelMode levelMode = Levels.LevelMode.FLOOR;
+    	Levels.LevelMod levelMod = Levels.LevelMod.LIP;
+    	
+    	
+    	
     	rightEncoder.setDistancePerPulse(1.0);
     	leftEncoder.setDistancePerPulse(1.0);
-    	*/
+    	
     	while(isEnabled()) {
     		gyroAngle = gyro.getAngle();
     		gyroRate = gyro.getRate();
@@ -83,8 +87,49 @@ public class Robot extends SampleRobot {
     		SmartDashboard.putNumber("Gyro Rate Graph: ", gyroRate);
     		gyro.update();
     		
+    		leftDriveFront.set(-left.getAxis(Joystick.AxisType.kY));
+    		leftDriveRear.set(-left.getAxis(Joystick.AxisType.kY));
+    		rightDriveFront.set(right.getAxis(Joystick.AxisType.kY));
+    		rightDriveRear.set(right.getAxis(Joystick.AxisType.kY));
+    		
+    		if(buttonPanel.getRawButton(1)) {
+    			mainLevel = Levels.MainLevel.ONE;
+    		} else if (buttonPanel.getRawButton(2)) {
+    			mainLevel = Levels.MainLevel.TWO;
+    		}
+    		
+    		if(buttonPanel.getRawButton(5)) {
+    			levelMode = Levels.LevelMode.FLOOR;
+    			
+    		} else if (buttonPanel.getRawButton(6)) {
+    			levelMode = Levels.LevelMode.STEP;
+    		}
+    		
+    		if(buttonPanel.getRawButton(8)) {
+    			carryObject = Levels.CarryObject.TOTE;
+    		} else if (buttonPanel.getRawButton(9)) {
+    			carryObject = Levels.CarryObject.CONTAINER;
+    		}
+    		switch(levelMode) {
+    		case FLOOR: {
+    			buttonPanel.setOutputs(0);
+    			buttonPanel.setOutput(1,true);
+    		}
+    		case STEP: {
+    			buttonPanel.setOutputs(0);
+    			buttonPanel.setOutput(2,true);
+    		}
+    		
+    		}
+    		
+    		elevatorHeight=levelHandler.getHeight(mainLevel, levelMode, carryObject, levelMod);
+    		SmartDashboard.putNumber("elevatorHeight", elevatorHeight);
+    		
+    		
     	}
     }
+    
+    
 
     /**
      * Runs during test mode

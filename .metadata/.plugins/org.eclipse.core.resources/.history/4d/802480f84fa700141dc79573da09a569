@@ -1,0 +1,46 @@
+package org.usfirst.frc.team1458.robot;
+
+public class Levels {
+	
+	private double height;
+	
+	public Levels() {
+		
+	}
+	
+	public enum mainLevel {
+		ONE(0.0),
+		TWO(1.0),
+		THREE(2.0),
+		FOUR(3.0);
+		
+		private double height;
+		
+		mainLevel(double height) {
+			this.height = height;
+		}
+		public double getHeight() {
+			return this.height;
+		}
+	}
+	public enum CarryObject {
+		ONE(0.0),
+		TWO(1.0),
+		THREE(2.0),
+		FOUR(3.0);
+		
+		private double height;
+		
+		mainLevel(double height) {
+			this.height = height;
+		}
+		public double getHeight() {
+			return this.height;
+		}
+	}
+	
+
+	
+	
+
+}

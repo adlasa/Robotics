@@ -15,21 +15,38 @@ import edu.wpi.first.wpilibj.AccumulatorResult;
 public class Infrared extends edu.wpi.first.wpilibj.SensorBase {
 	private double rate;
 	private double distance;
+	private int curveType;
 	AnalogInput analogInput;
 
-	public Infrared(int i) {
+	public Infrared(int i, int curveType) {
 		analogInput = new AnalogInput(i);
+		this.curveType = curveType;
 	}
 
-	
 	public void update() {
-		distance = analogInput.getVoltage()*1;
+		distance = curve(analogInput.getVoltage(), curveType);
 	}
-	
+
 	public double getDistance() {
 		update();
 		return distance;
 	}
 
-	
+	// 0: Raw voltage, 1: 20-150cm curve, 2: 10-80cm curve
+	private double curve(double voltage, int curveType) {
+		switch (curveType) {
+		case 0: {
+			return voltage;
+		}
+		case 1: {
+			return 1 / (voltage - 0);// change 1 to whatever
+		}
+		case 2: {
+			return 1 / (voltage - 0);// change 1 & 0 to whatever
+		}
+		}
+
+		return 1 / 0;
+	}
+
 }

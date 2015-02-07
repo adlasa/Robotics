@@ -1,5 +1,6 @@
 package org.usfirst.frc.team1458.robot;
 
+import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Elevator {
@@ -64,6 +65,9 @@ public class Elevator {
 	public void goTowardsDesired() {
 		if (!manual) {
 			// code
+			motorMovement=0.1*(desiredElevatorHeight-elevatorHeight);//0.1 is coeffecient assumes need to move up
+		} else {
+			//do nothing
 		}
 
 	}

@@ -1,0 +1,59 @@
+
+package org.usfirst.frc.team1458.robot;
+
+
+import edu.wpi.first.wpilibj.Compressor;
+import edu.wpi.first.wpilibj.SampleRobot;
+import edu.wpi.first.wpilibj.RobotDrive;
+import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.Solenoid;
+import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
+/**
+*
+ */
+public class Robot extends SampleRobot {
+	Compressor c;
+	Solenoid s;
+	Joystick stick = new Joystick(1);
+
+    public Robot() {
+        c=new Compressor();
+        s=new Solenoid(1);
+    }
+
+    /**
+     * Drive left & right motors for 2 seconds then stop
+     */
+    public void autonomous() {
+    	
+    }
+
+    /**
+     * Runs the motors with arcade steering.
+     */
+    public void operatorControl() {
+    	c.start();
+    	while(isEnabled()) {
+    		SmartDashboard.putBoolean("Compressor enabled", c.enabled());
+    		if(stick.getRawButton(1)) {
+    			s.set(true);
+    		} else if(stick.getRawButton(2)) {
+    			s.set(false);
+    		}
+    		if(stick.getRawButton(4)) {
+    			c.start();
+    			
+    		} else if (stick.getRawButton(5)) {
+    			c.stop();
+    		}
+    	}
+    }
+
+    /**
+     * Runs during test mode
+     */
+    public void test() {
+    }
+}

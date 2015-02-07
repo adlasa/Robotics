@@ -19,8 +19,8 @@ public class mathTest {
 		double ya;
 		double angle;
 		double adjustAngle = Math.PI / 4;
-		double righty = 0;
-		double rightx = 0;
+		double righty = -1;
+		double rightx = -1;
 		
 			y = righty;
 			x = rightx;

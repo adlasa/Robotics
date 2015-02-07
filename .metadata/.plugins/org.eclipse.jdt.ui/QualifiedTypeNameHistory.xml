@@ -1,2 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<qualifiedTypeNameHistroy/>
+<qualifiedTypeNameHistroy>
+<fullyQualifiedTypeName name="edu.wpi.first.wpilibj.PWM"/>
+<fullyQualifiedTypeName name="org.usfirst.frc.team1458.robot.Levels.MainLevel"/>
+<fullyQualifiedTypeName name="org.usfirst.frc.team1458.robot.Levels.LevelMode"/>
+<fullyQualifiedTypeName name="edu.wpi.first.wpilibj.Compressor"/>
+<fullyQualifiedTypeName name="edu.wpi.first.wpilibj.DoubleSolenoid"/>
+<fullyQualifiedTypeName name="edu.wpi.first.wpilibj.Solenoid"/>
+<fullyQualifiedTypeName name="edu.wpi.first.wpilibj.Joystick"/>
+<fullyQualifiedTypeName name="edu.wpi.first.wpilibj.Joystick.AxisType"/>
+</qualifiedTypeNameHistroy>

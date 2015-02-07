@@ -1,7 +1,0 @@
-package org.usfirst.frc.team1458.robot;
-
-public class Level {
-	
-	private double height;
-
-}

@@ -6,6 +6,8 @@ import org.usfirst.frc.team1458.robot.Levels.LevelMode;
 import org.usfirst.frc.team1458.robot.Levels.MainLevel;
 
 import edu.wpi.first.wpilibj.Compressor;
+import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.DigitalOutput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.PowerDistributionPanel;
@@ -23,7 +25,8 @@ public class Robot extends SampleRobot {
 	Joystick left = new Joystick(1);
 	Joystick buttonPanel = new Joystick(2);
 
-	Timer t = new Timer();
+	Timer timer = new Timer();
+	Timer timer2 = new Timer();
 
 	Encoder leftEncoder = new Encoder(0, 1);// need proper channels
 	Encoder rightEncoder = new Encoder(2, 3);// need proper channels
@@ -33,13 +36,13 @@ public class Robot extends SampleRobot {
 	I2CMagnetometer magnetometer = new I2CMagnetometer();
 
 	Infrared toteCheck = new Infrared(2, 2);
-	Infrared seeRight = new Infrared(3, 1);
+	Infrared seeRight = new Infrared(3, 0);
 	Infrared seeLeft = new Infrared(4, 1);
 
 	LED ledStrip = new LED();
 
 	Compressor compressor = new Compressor(0);
-	DoubleSolenoid solenoid = new DoubleSolenoid(0, 1);
+	DoubleSolenoid hSolenoid = new DoubleSolenoid(0, 1);
 
 	PowerDistributionPanel pdp = new PowerDistributionPanel();
 
@@ -67,22 +70,33 @@ public class Robot extends SampleRobot {
 	 */
 	public void operatorControl() {
 
+		compressor.start();
+		
 		gyro.reset();
 		gyro.update();
 		double gyroAngle;
 		double gyroRate;
+		
+		seeRight.reset();
 
 		magnetometer.zero();
 
 		rightEncoder.setDistancePerPulse(1.0);
 		leftEncoder.setDistancePerPulse(1.0);
-		t.start();
+		timer.start();
+		timer2.start();
 
-		while (isEnabled()) {
+		while (isEnabled() && isOperatorControl()) {
+			SmartDashboard.putNumber("test encoder",leftEncoder.get());
 
-			SmartDashboard.putNumber("Update speed", 1 / t.get());
-			t.reset();
-			
+			SmartDashboard.putNumber("Update speed", 1 / timer.get());
+			timer.reset();
+			SmartDashboard.putNumber("Timer 2", timer2.get());
+			if (timer2.get() >= 0.1) {
+				SmartDashboard.putNumber("Infrared test distance",seeRight.getDistance());
+				timer2.reset();
+			}
+
 			elevator.update();
 			robot.edrive(elevator.motorMovement);
 
@@ -92,20 +106,20 @@ public class Robot extends SampleRobot {
 			}
 			if (right.getRawButton(3)) {
 				// deploy H
-				solenoid.set(DoubleSolenoid.Value.kForward);
+				hSolenoid.set(DoubleSolenoid.Value.kForward);
 				robot.hMode = true;
 				robot.hdrive(left.getAxis(Joystick.AxisType.kY));
 			}
 			if (right.getRawButton(4)) {
 				// retract H
-				solenoid.set(DoubleSolenoid.Value.kReverse);
+				hSolenoid.set(DoubleSolenoid.Value.kReverse);
 				robot.hMode = false;
 			}
 
 			if (magnetometer.isReady()) {
 				magnetometer.update();
 
-			} 
+			}
 			SmartDashboard.putNumber("Direction", magnetometer.getAngle());
 
 			// TEMPORARY COMMENT

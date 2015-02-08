@@ -17,9 +17,9 @@ public class RobotFunctions {
 	Victor leftDriveFront = new Victor(3);
 	Victor leftDriveRear = new Victor(2);
 	Talon hDrive = new Talon(4);
-	Talon arm1 = new Talon(5);
-	Talon arm2 = new Talon(6);
-	Talon elevator = new Talon(7);
+	Talon armLeft = new Talon(7);
+	Talon armRight = new Talon(6);
+	Talon elevator = new Talon(5);
 	
 	RobotFunctions() {
 		
@@ -29,6 +29,7 @@ public class RobotFunctions {
 	{
 		rdrive(rightPower);
 		ldrive(leftPower);
+	
 	}
 	
 	public void rdrive(double power) {
@@ -48,11 +49,11 @@ public class RobotFunctions {
 		leftDriveFront.set(0);
 		leftDriveRear.set(0);
 	}
-	public void a1drive(double power) {
-		arm1.set(power);
+	public void aLeftdrive(double power) {
+		armLeft.set(power);
 	}
-	public void a2drive(double power) {
-		arm2.set(power);
+	public void aRightdrive(double power) {
+		armRight.set(power);
 	}
 	
 	public void edrive(double power) {

@@ -1,5 +1,7 @@
 package org.usfirst.frc.team1458.robot;
 
+import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -14,13 +16,19 @@ public class Elevator {
 	Levels.LevelMode levelMode = Levels.LevelMode.FLOOR;
 	Levels.LevelMod levelMod = Levels.LevelMod.LIP;
 
-	Infrared elevatorBottom = new Infrared(0, 1);
-	Infrared elevatorTop = new Infrared(1, 1);
+	//Infrared elevatorBottom = new Infrared(0, 1);
+	//Infrared elevatorTop = new Infrared(1, 1);
+	
+	Encoder elevatorEncoder = new Encoder(6,7);
+	
+	DigitalInput topLimit = new DigitalInput(4);
+	DigitalInput bottomLimit = new DigitalInput(5);
 
 	double elevatorHeight;
 	double desiredElevatorHeight;
 
-	boolean manual;
+	boolean isManual = true;
+	boolean canMove = true;
 
 	Levels levelHandler = new Levels();
 
@@ -55,15 +63,20 @@ public class Elevator {
 	}
 
 	public void update() {
+		if(topLimit.get()||bottomLimit.get()) {
+			canMove= false;
+		}
 		desiredElevatorHeight = levelHandler.getHeight(mainLevel, levelMode,
 				carryObject, levelMod);
 		SmartDashboard
 				.putNumber("desiredElevatorHeight", desiredElevatorHeight);
 		seeHeight();
+		goTowardsDesired();
+		
 	}
 
 	public void goTowardsDesired() {
-		if (!manual) {
+		if (canMove&&!isManual) {
 			// code
 			motorMovement=0.1*(desiredElevatorHeight-elevatorHeight);//0.1 is coeffecient assumes need to move up
 		} else {
@@ -77,38 +90,41 @@ public class Elevator {
 	}
 
 	public void manualUp() {
-		if (manual) {
+		if (canMove&&isManual) {
 			motorMovement = 1;
 		}
 
 	}
 
 	public void manualDown() {
-		if (manual) {
+		if (canMove&&isManual) {
 			motorMovement = -1;
 		}
 
 	}
 	
 	public void manualAmount(double power) {
-		if (manual) {
+		if (canMove&&isManual) {
 			motorMovement = power;
 		}
 	}
 
 	public void setManual(boolean manual) {
-		this.manual = manual;
+		this.isManual = manual;
 	}
 
 	public boolean getManual() {
-		return manual;
+		return isManual;
 	}
 
 	public void seeHeight() {
+		/*
 		elevatorHeight = elevatorBottom.getDistance() - 0;
 		if (elevatorHeight > 75) {
 			elevatorHeight = elevatorTop.getDistance() - 0;
 		}
+		*/
+		elevatorHeight=1*elevatorEncoder.get();
 
 	}
 }

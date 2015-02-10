@@ -24,7 +24,7 @@ public class Robot extends SampleRobot {
 	
 	Encoder testEncoder = new Encoder(0,1);
 	
-	int leftMode, rightMode = 2;
+	int leftMode, rightMode;
 
 	public Robot() {
 	}
@@ -35,8 +35,7 @@ public class Robot extends SampleRobot {
 	public void operatorControl() {
 		while (isOperatorControl() && isEnabled()) {
 			
-			SmartDashboard.putNumber("Encoder Count", testEncoder.get());
-			SmartDashboard.putNumber("Encoder Raw Count", testEncoder.getRaw());
+			SmartDashboard.putNumber("", value);
 			
 			if (left.getRawButton(2))
 			{

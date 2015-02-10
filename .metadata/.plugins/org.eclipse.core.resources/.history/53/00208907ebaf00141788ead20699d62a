@@ -7,7 +7,6 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.Victor;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Robot extends SampleRobot {
 	Joystick right = new Joystick(0);
@@ -24,7 +23,7 @@ public class Robot extends SampleRobot {
 	
 	Encoder testEncoder = new Encoder(0,1);
 	
-	int leftMode, rightMode = 2;
+	int leftMode, rightMode;
 
 	public Robot() {
 	}
@@ -35,8 +34,7 @@ public class Robot extends SampleRobot {
 	public void operatorControl() {
 		while (isOperatorControl() && isEnabled()) {
 			
-			SmartDashboard.putNumber("Encoder Count", testEncoder.get());
-			SmartDashboard.putNumber("Encoder Raw Count", testEncoder.getRaw());
+			
 			
 			if (left.getRawButton(2))
 			{

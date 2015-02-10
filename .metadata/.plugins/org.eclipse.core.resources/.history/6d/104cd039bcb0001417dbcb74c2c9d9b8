@@ -101,12 +101,10 @@ public class Robot extends SampleRobot {
 			elevator.update();
 			robot.edrive(elevator.motorMovement);
 
-			//intake of a stack n high
+			//intake
 			if(buttonPanel.getRawButton(9)) {
-				//raise elevator to level n+1
 				//run intake
-				//lower elevator to level n
-				//
+				//lower elevator to level 1
 			}
 			
 			//outtake

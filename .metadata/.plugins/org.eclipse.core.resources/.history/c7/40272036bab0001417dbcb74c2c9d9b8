@@ -96,27 +96,10 @@ public class Robot extends SampleRobot {
 				SmartDashboard.putNumber("Infrared test distance",seeRight.getDistance());
 				timer2.reset();
 			}
-			
 
 			elevator.update();
 			robot.edrive(elevator.motorMovement);
 
-			//intake of a stack n high
-			if(buttonPanel.getRawButton(9)) {
-				//raise elevator to level n+1
-				//run intake
-				//lower elevator to level n
-				//
-			}
-			
-			//outtake
-			if(buttonPanel.getRawButton(10)) {
-				
-			}
-			
-			
-			
-			
 			if (!robot.hMode) {
 				robot.tankdrive(left.getAxis(Joystick.AxisType.kX),
 						right.getAxis(Joystick.AxisType.kX));

@@ -24,7 +24,7 @@ public class Robot extends SampleRobot {
 	
 	Encoder testEncoder = new Encoder(0,1);
 	
-	int leftMode, rightMode = 2;
+	int leftMode, rightMode;
 
 	public Robot() {
 	}

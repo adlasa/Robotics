@@ -22,9 +22,12 @@ public class Infrared extends edu.wpi.first.wpilibj.SensorBase {
 	private Timer t = new Timer();
 	private double average = 0;
 	private int count = 0;
+	private int arrayCount = 0;
 	private final double[] curveArrayA = { 2.670, 2.369, 2.049, 1.709, 1.427, 1.227, 1.080, 0.961, 0.895, 0.847, 0.811, 0.771, 0.751, 0.736, 0.713, 0.690 };// 5Y
 
 	private final double[] curveArrayB = { 2.718, 2.392, };// For B which is a 45
+	
+	private double[] averageArray = new double[100];
 															
 
 	public Infrared(int inputPort, int curveType) {
@@ -41,10 +44,28 @@ public class Infrared extends edu.wpi.first.wpilibj.SensorBase {
 
 	public void update() {
 		distance = curve(analogInput.getVoltage(), curveType);
+		/*
 		average = (count * average + distance) / (count + 1);
 		count++;
 		SmartDashboard.putNumber("average" + inputNum, average);
 		SmartDashboard.putNumber("count" + inputNum, count);
+		*/
+		averageArray[arrayCount] = distance;
+		average=0;
+		int i;
+		for(i = 0; i<averageArray.length; i++) {
+			if(averageArray[i]!=0) {
+				average+=averageArray[i];
+			} else {
+				break;
+			}
+			
+		}
+		average/=i;
+		arrayCount++;
+		if(arrayCount>=averageArray.length) {
+			arrayCount=0;
+		}
 	}
 
 	public double getDistance() {
@@ -53,7 +74,7 @@ public class Infrared extends edu.wpi.first.wpilibj.SensorBase {
 	}
 
 	// 0: Raw voltage, 1: 20-150cm curve, 2: 10-80cm curve 3: kyle calibrated
-	// for Tri, 4: weighted average broken slope for B
+	// for A, 4: weighted average broken slope for B
 	// line
 	private double curve(double voltage, int curveType) {
 		switch (curveType) {

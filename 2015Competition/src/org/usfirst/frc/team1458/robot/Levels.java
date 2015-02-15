@@ -12,9 +12,9 @@ public class Levels {
 	
 	public enum MainLevel {
 		ONE(0.0),
-		TWO(1.0),
-		THREE(2.0),
-		FOUR(3.0);
+		TWO(11.5),
+		THREE(23.0),
+		FOUR(34.5);
 		
 		private double height;
 		
@@ -27,8 +27,8 @@ public class Levels {
 	}
 	public enum LevelMode {
 		FLOOR(0.0),
-		PLATFORM(0.2),
-		STEP(0.9);
+		PLATFORM(2.0),
+		STEP(6.0);
 		
 		private double height;
 		
@@ -41,7 +41,7 @@ public class Levels {
 	}
 	public enum CarryObject {
 		TOTE(0.0),
-		CONTAINER(1.3);
+		CONTAINER(13.0);
 		
 		private double height;
 		
@@ -53,10 +53,8 @@ public class Levels {
 		}
 	}
 	public enum LevelMod {
-		LIP(0.0),
-		CARRY(0.4),
-		GRAB(0.2),
-		DISENGAGE(-0.2);
+		LOAD(5.5),
+		UNLOAD(0.0);
 		
 		private double height;
 		

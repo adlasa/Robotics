@@ -14,25 +14,41 @@ public class Elevator {
 	Levels.MainLevel mainLevel = Levels.MainLevel.ONE;
 	Levels.CarryObject carryObject = Levels.CarryObject.TOTE;
 	Levels.LevelMode levelMode = Levels.LevelMode.FLOOR;
-	Levels.LevelMod levelMod = Levels.LevelMod.LIP;
+	Levels.LevelMod levelMod = Levels.LevelMod.LOAD;
 
-	//Infrared elevatorBottom = new Infrared(0, 1);
-	//Infrared elevatorTop = new Infrared(1, 1);
-	
-	Encoder elevatorEncoder = new Encoder(6,7);
-	
-	DigitalInput topLimit = new DigitalInput(4);
-	DigitalInput bottomLimit = new DigitalInput(5);
+	// Infrared elevatorBottom = new Infrared(0, 1);
+	// Infrared elevatorTop = new Infrared(1, 1);
+	private final double ACCEPTABLEERROR = 1.0;
+	private boolean atHeight = false;
+
+	Encoder elevatorEncoder = new Encoder(6, 7);
+
+	DigitalInput topLimit = new DigitalInput(8);
+	DigitalInput bottomLimit = new DigitalInput(9);
 
 	double elevatorHeight;
 	double desiredElevatorHeight;
 
 	boolean isManual = true;
-	boolean canMove = true;
+	boolean canMoveUp = true;
+	boolean canMoveDown = true;
 
 	Levels levelHandler = new Levels();
 
 	public double motorMovement;
+
+	public enum ElevatorMode {
+
+		INTAKELIFT(), INTAKESUCK(), INTAKEDROP(), OUTTAKE(), CARRY();
+
+		private ElevatorMode() {
+			
+		}
+	}
+	
+	public boolean getAtHeight() {
+		return atHeight;
+	}
 
 	public double getElevatorHeight() {
 		return elevatorHeight;
@@ -63,24 +79,45 @@ public class Elevator {
 	}
 
 	public void update() {
-		if(topLimit.get()||bottomLimit.get()) {
-			canMove= false;
+		if (topLimit.get()) {
+			canMoveUp = false;
+		} else {
+			canMoveUp = true;
 		}
-		desiredElevatorHeight = levelHandler.getHeight(mainLevel, levelMode,
-				carryObject, levelMod);
-		SmartDashboard
-				.putNumber("desiredElevatorHeight", desiredElevatorHeight);
+		if (bottomLimit.get()) {
+			elevatorEncoder.reset();
+			canMoveDown = false;
+		} else {
+			canMoveDown = true;
+		}
+		desiredElevatorHeight = levelHandler.getHeight(mainLevel, levelMode, carryObject, levelMod);
+		SmartDashboard.putNumber("desiredElevatorHeight", desiredElevatorHeight);
 		seeHeight();
 		goTowardsDesired();
-		
+
 	}
 
 	public void goTowardsDesired() {
-		if (canMove&&!isManual) {
+		if (!isManual) {
 			// code
-			motorMovement=0.1*(desiredElevatorHeight-elevatorHeight);//0.1 is coeffecient assumes need to move up
+			motorMovement = 0.2 * (desiredElevatorHeight - elevatorHeight);// 0.1
+																			// is
+																			// coeffecient
+			if ((!canMoveUp)&&motorMovement>0) {
+				motorMovement=0;
+
+			}
+			if ((!canMoveDown)&&motorMovement<0) {
+				motorMovement=0;
+
+			}
+			if(Math.abs(desiredElevatorHeight-elevatorHeight)<ACCEPTABLEERROR) {
+				atHeight = true;
+			} else {
+				atHeight = false;
+			}
 		} else {
-			//do nothing
+			// do nothing
 		}
 
 	}
@@ -90,21 +127,24 @@ public class Elevator {
 	}
 
 	public void manualUp() {
-		if (canMove&&isManual) {
+		update();
+		if (canMoveUp && isManual) {
 			motorMovement = 1;
 		}
 
 	}
 
 	public void manualDown() {
-		if (canMove&&isManual) {
+		update();
+		if (canMoveDown && isManual) {
 			motorMovement = -1;
 		}
 
 	}
-	
+
 	public void manualAmount(double power) {
-		if (canMove&&isManual) {
+		update();
+		if (canMoveUp && canMoveDown && isManual) {
 			motorMovement = power;
 		}
 	}
@@ -118,13 +158,14 @@ public class Elevator {
 	}
 
 	public void seeHeight() {
-		/*
-		elevatorHeight = elevatorBottom.getDistance() - 0;
-		if (elevatorHeight > 75) {
-			elevatorHeight = elevatorTop.getDistance() - 0;
-		}
-		*/
-		elevatorHeight=1*elevatorEncoder.get();
+		// returns height in inches
+		elevatorHeight = /*
+						 * 7.3125 + disabled b/c measuring from bottom of
+						 * elevator
+						 */(0.01121383 * elevatorEncoder.get());
+		// 0.01126126
+		// 0.01125687
+		// 0.01112335
 
 	}
 }

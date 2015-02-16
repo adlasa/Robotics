@@ -25,38 +25,38 @@ public class RobotFunctions {
 		
 	}
 	
-	public void tankdrive(double rightPower, double leftPower)
+	public void tankDrive(double rightPower, double leftPower)
 	{
-		rdrive(rightPower);
-		ldrive(leftPower);
+		rDrive(rightPower);
+		lDrive(leftPower);
 	
 	}
 	
-	public void rdrive(double power) {
+	public void rDrive(double power) {
 		rightDriveFront.set(-power);
 		rightDriveRear.set(-power);
 		hDrive.set(0);
 	}
-	public void ldrive(double power) {
+	public void lDrive(double power) {
 		leftDriveFront.set(power);
 		leftDriveRear.set(power);
 		hDrive.set(0);
 	}
-	public void hdrive(double power) {
+	public void hDrive(double power) {
 		hDrive.set(power);
 		rightDriveFront.set(0);
 		rightDriveRear.set(0);
 		leftDriveFront.set(0);
 		leftDriveRear.set(0);
 	}
-	public void aLeftdrive(double power) {
+	public void aLeftDrive(double power) {
 		armLeft.set(power);
 	}
-	public void aRightdrive(double power) {
+	public void aRightDrive(double power) {
 		armRight.set(power);
 	}
 	
-	public void edrive(double power) {
+	public void eDrive(double power) {
 		elevator.set(power);
 	}
 	

@@ -64,7 +64,7 @@ public class I2CMagnetometer extends edu.wpi.first.wpilibj.SensorBase {
 		SmartDashboard.putNumber("X Max", 0);
 		SmartDashboard.putNumber("Y Max", 0);
 		SmartDashboard.putNumber("Z Max", 0);
-		SmartDashboard.putNumber("X Min", -10000);
+		SmartDashboard.putNumber("X Min", 10000);
 		SmartDashboard.putNumber("Y Min", 10000);
 		SmartDashboard.putNumber("Z Min", 10000);
 
@@ -120,11 +120,11 @@ public class I2CMagnetometer extends edu.wpi.first.wpilibj.SensorBase {
 	}
 
 	public void zero() {
-		offsetAngle=angle;
+		//offsetAngle=angle;
 		SmartDashboard.putNumber("X Max", 0);
 		SmartDashboard.putNumber("Y Max", 0);
 		SmartDashboard.putNumber("Z Max", 0);
-		SmartDashboard.putNumber("X Min", -10000);
+		SmartDashboard.putNumber("X Min", 10000);
 		SmartDashboard.putNumber("Y Min", 10000);
 		SmartDashboard.putNumber("Z Min", 10000);
 	}
@@ -138,29 +138,39 @@ public class I2CMagnetometer extends edu.wpi.first.wpilibj.SensorBase {
 	public void update() {
 		m_i2c.read(0x01, 6, rawInput);
 		// convert it into number format
+		
+		
 		for(int f = 0; f<3; f++) {
 			int i = (int) rawInput[0+2*f];
 			i *= 256;
-			i += (int) rawInput[1+2*f];
+			if((int)rawInput[1+2*f]<0) {
+				i+=(256+(int)rawInput[1+2*f]);
+			} else {
+				i+=(int)rawInput[1+2*f];
+			}
+			//i += (int) rawInput[1+2*f];
 			axes[f] = rateAdjust(i);
+			//axes[f] = 0.8*rateAdjust(i)+0.2*axes[f];
 		}
+
 		axes[0]/=-1;//flip x to be right
 
-		axes[0]-=1265; // old was 1252.5, 
-		axes[1]-=1123;
-		axes[2]-=0;
-		axes[0]/=1;
-		axes[1]/=1;
-		axes[2]/=1;
+		axes[0]-=1247; // old was 1252.5, 
+		axes[1]-=1186;
+		//axes[2]-=0;
+		axes[0]/=239;
+		axes[1]/=241;
+		//axes[2]/=1;
+		
 
 		SmartDashboard.putNumber("X field", axes[0]);
 		SmartDashboard.putNumber("Y field", axes[1]);
 		SmartDashboard.putNumber("Z field", axes[2]);
 
-		if(SmartDashboard.getNumber("X Max",0)>axes[0]) {
+		if(SmartDashboard.getNumber("X Max",0)<axes[0]) {
 			SmartDashboard.putNumber("X Max", axes[0]);
 		}
-		if(SmartDashboard.getNumber("X Min",-10000)<axes[0]) {
+		if(SmartDashboard.getNumber("X Min",10000)>axes[0]) {
 			SmartDashboard.putNumber("X Min", axes[0]);
 		}
 		if(SmartDashboard.getNumber("Y Max",0)<axes[1]) {
@@ -175,6 +185,10 @@ public class I2CMagnetometer extends edu.wpi.first.wpilibj.SensorBase {
 		if(SmartDashboard.getNumber("Z Min",10000)>axes[2]) {
 			SmartDashboard.putNumber("Z Min", axes[2]);
 		}
+		
+		SmartDashboard.putNumber("X Raw field", axes[0]);
+		SmartDashboard.putNumber("Y Raw field", axes[1]);
+		SmartDashboard.putNumber("Z Raw field", axes[2]);
 
 		//do correction stuffs
 
@@ -210,9 +224,10 @@ public class I2CMagnetometer extends edu.wpi.first.wpilibj.SensorBase {
 		 */
 
 		angle*=(180/Math.PI);
-		angle=90-angle;
+		
 
-		angle-=offsetAngle;//placeholder
+		angle+=90;//placeholder
+		angle = Math.round(angle * 10) / 10.0;
 	}
 
 	public double sgn(double n) {

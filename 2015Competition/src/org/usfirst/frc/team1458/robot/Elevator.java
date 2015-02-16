@@ -100,7 +100,7 @@ public class Elevator {
 	public void goTowardsDesired() {
 		if (!isManual) {
 			// code
-			motorMovement = 0.2 * (desiredElevatorHeight - elevatorHeight);// 0.1
+			motorMovement = 0.2 * (desiredElevatorHeight - elevatorHeight);// 0.2
 																			// is
 																			// coeffecient
 			if ((!canMoveUp)&&motorMovement>0) {

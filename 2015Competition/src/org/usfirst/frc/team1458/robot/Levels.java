@@ -3,7 +3,12 @@ package org.usfirst.frc.team1458.robot;
 public class Levels {
 	
 	public double getHeight(MainLevel m, LevelMode l, CarryObject c, LevelMod d) {
-		return m.getHeight()+l.getHeight()+c.getHeight()+d.getHeight();
+		if(d==LevelMod.LOAD) {
+			return m.getHeight()+l.getHeight()+c.getHeight()+d.getHeight();
+		} else {
+			return m.getHeight()+l.getHeight()+d.getHeight();
+		}
+		
 	}
 	
 	public Levels() {

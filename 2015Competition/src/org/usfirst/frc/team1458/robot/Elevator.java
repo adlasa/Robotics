@@ -33,6 +33,7 @@ public class Elevator {
 	boolean canMoveUp = true;
 	boolean canMoveDown = true;
 
+
 	Levels levelHandler = new Levels();
 
 	public double motorMovement;
@@ -84,7 +85,7 @@ public class Elevator {
 		} else {
 			canMoveUp = true;
 		}
-		if (bottomLimit.get()) {
+		if (!bottomLimit.get()) {
 			elevatorEncoder.reset();
 			canMoveDown = false;
 		} else {
@@ -92,6 +93,8 @@ public class Elevator {
 		}
 		desiredElevatorHeight = levelHandler.getHeight(mainLevel, levelMode, carryObject, levelMod);
 		SmartDashboard.putNumber("desiredElevatorHeight", desiredElevatorHeight);
+		SmartDashboard.putBoolean("Top Limit",topLimit.get());
+		SmartDashboard.putBoolean("Bottom Limit",!bottomLimit.get());
 		seeHeight();
 		goTowardsDesired();
 
@@ -130,6 +133,8 @@ public class Elevator {
 		update();
 		if (canMoveUp && isManual) {
 			motorMovement = 1;
+		} else if (!canMoveUp) {
+			motorMovement = 0;
 		}
 
 	}
@@ -138,6 +143,8 @@ public class Elevator {
 		update();
 		if (canMoveDown && isManual) {
 			motorMovement = -1;
+		} else if (!canMoveDown) {
+			motorMovement = 0;
 		}
 
 	}

@@ -1,5 +1,6 @@
 package org.usfirst.frc.team1458.robot;
 
+import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.SampleRobot;
 import edu.wpi.first.wpilibj.Joystick;
@@ -21,8 +22,27 @@ public class RobotFunctions {
 	Talon armRight = new Talon(6);
 	Talon elevator = new Talon(5);
 	
+	DoubleSolenoid centreSolenoid = new DoubleSolenoid(0, 1);
+	DoubleSolenoid intakeSolenoid = new DoubleSolenoid(2, 3);
+	
 	RobotFunctions() {
 		
+	}
+	
+	public void hSolenoid(boolean down) {
+		if(down) {
+			centreSolenoid.set(DoubleSolenoid.Value.kReverse);
+		} else {
+			centreSolenoid.set(DoubleSolenoid.Value.kForward);
+		}
+	}
+	
+	public void intakeSolenoid(boolean open) {
+		if(open) {
+			intakeSolenoid.set(DoubleSolenoid.Value.kForward);
+		} else {
+			intakeSolenoid.set(DoubleSolenoid.Value.kReverse);
+		}
 	}
 	
 	public void tankDrive(double rightPower, double leftPower)

@@ -50,6 +50,10 @@ public class Robot extends SampleRobot {
 	}
 
 	public void autonomous() {
+		while(isEnabled()) {
+			hDrive.set(1);	
+		}
+		
 	}
 
 	public void operatorControl() {

@@ -12,4 +12,5 @@
 <fullyQualifiedTypeName name="edu.wpi.first.wpilibj.Joystick.AxisType"/>
 <fullyQualifiedTypeName name="edu.wpi.first.wpilibj.DigitalInput"/>
 <fullyQualifiedTypeName name="edu.wpi.first.wpilibj.Compressor"/>
+<fullyQualifiedTypeName name="edu.wpi.first.wpilibj.Timer"/>
 </qualifiedTypeNameHistroy>

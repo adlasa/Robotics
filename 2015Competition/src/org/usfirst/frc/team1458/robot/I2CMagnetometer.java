@@ -15,28 +15,17 @@ import edu.wpi.first.wpilibj.AccumulatorResult;
 public class I2CMagnetometer extends edu.wpi.first.wpilibj.SensorBase {
 
 	private double angle;
-	private double offsetAngle; //angle in degrees that the robot starts out pointing
 	I2C m_i2c;
-	private double rate;
 	private byte[] rawInput = new byte[6];
-	private final int address = 0x0e;
-	private Timer timer = new Timer();
+	private final int address = 0x0e;//specific to magnetometer
 	private double[] axes = new double[3]; // x y z
 	byte[] buffer = new byte[1];
-	
-	private double m;
 
 	/**
-	 * Initialize the gyro. Calibrate the gyro by running for a number of
-	 * samples and computing the center value for this part. Then use the center
-	 * value as the Accumulator center value for subsequent measurements. It's
-	 * important to make sure that the robot is not moving while the centering
-	 * calculations are in progress, this is typically done when the robot is
-	 * first turned on while it's sitting at rest before the competition starts.
+	 * Initialise the magnetometer, should only be run by the constructor.
 	 */
 	private void initMagnetometer() {
-		offsetAngle=0;
-		
+		//checks to see if it is null
 		if (m_i2c == null) {
 			System.out.println("Null m_i2c");
 		}
@@ -51,9 +40,11 @@ public class I2CMagnetometer extends edu.wpi.first.wpilibj.SensorBase {
 			System.out.println("Found who am i");
 		}
 
+		//settings for rate and measuring data
 		m_i2c.write(0x10, 0b00011001);
 		m_i2c.write(0x11, 0b10000000);
 
+		//calibration (done in code, so set to 0)
 		m_i2c.write(0x09, 0b00000000);
 		m_i2c.write(0x0a, 0b00000000);
 		m_i2c.write(0x0b, 0b00000000);
@@ -61,6 +52,7 @@ public class I2CMagnetometer extends edu.wpi.first.wpilibj.SensorBase {
 		m_i2c.write(0x0d, 0b00000000);
 		m_i2c.write(0x0e, 0b00000000);
 
+		//starting values for max and min that should allow for comparison while being easily exceeded
 		SmartDashboard.putNumber("X Max", 0);
 		SmartDashboard.putNumber("Y Max", 0);
 		SmartDashboard.putNumber("Z Max", 0);
@@ -68,18 +60,14 @@ public class I2CMagnetometer extends edu.wpi.first.wpilibj.SensorBase {
 		SmartDashboard.putNumber("Y Min", 10000);
 		SmartDashboard.putNumber("Z Min", 10000);
 
+		//initial update
 		update();
 		zero();
 
 	}
 
 	/**
-	 * Gyro constructor with only a channel.
-	 *
-	 * Use the default analog module slot.
-	 *
-	 * @param channel
-	 *            The analog channel the gyro is connected to.
+	 * Magnetometer constructor, address is precoded
 	 */
 	public I2CMagnetometer() {
 		// m_analog = new AnalogChannel(channel);
@@ -91,14 +79,10 @@ public class I2CMagnetometer extends edu.wpi.first.wpilibj.SensorBase {
 	/**
 	 * Return the actual angle in degrees that the robot is currently facing.
 	 *
-	 * The angle is based on the current accumulator value corrected by the
-	 * oversampling rate, the gyro type, and the A/D calibration values. The
-	 * angle is continuous, that is can go beyond 360 degrees. This make
-	 * algorithms that wouldn't want to see a discontinuity in the gyro output
-	 * as it sweeps past 0 on the second time around.
+	 * The angle is based on the values, it is NOT continuous.
 	 *
 	 * @return the current heading of the robot in degrees. This heading is
-	 *         based on integration of the returned rate from the gyro.
+	 *         based on the magnetometer.
 	 */
 	public double getAngle() {
 		// update();
@@ -106,21 +90,7 @@ public class I2CMagnetometer extends edu.wpi.first.wpilibj.SensorBase {
 		return angle;
 	}
 
-	/**
-	 * Return the rate of rotation of the gyro
-	 * 
-	 * The rate is based on the most recent reading of the gyro analog value
-	 * 
-	 * @return the current rate in degrees per second
-	 */
-	public double getRate() {
-
-		update();
-		return rate;
-	}
-
 	public void zero() {
-		//offsetAngle=angle;
 		SmartDashboard.putNumber("X Max", 0);
 		SmartDashboard.putNumber("Y Max", 0);
 		SmartDashboard.putNumber("Z Max", 0);
@@ -128,6 +98,10 @@ public class I2CMagnetometer extends edu.wpi.first.wpilibj.SensorBase {
 		SmartDashboard.putNumber("Y Min", 10000);
 		SmartDashboard.putNumber("Z Min", 10000);
 	}
+	/**
+	 * Returns whether the magnetometer is ready to output new data. Currently set to automatically return true.
+	 * @return Always true;
+	 */
 	
 	public boolean isReady() {
 		return true;
@@ -136,33 +110,38 @@ public class I2CMagnetometer extends edu.wpi.first.wpilibj.SensorBase {
 	}
 
 	public void update() {
+		//get values from magnetometer
 		m_i2c.read(0x01, 6, rawInput);
 		// convert it into number format
-		
-		
-		for(int f = 0; f<3; f++) {
-			int i = (int) rawInput[0+2*f];
-			i *= 256;
-			if((int)rawInput[1+2*f]<0) {
-				i+=(256+(int)rawInput[1+2*f]);
+		//for loop for each axis
+		for(int i = 0; i<3; i++) {
+			//sets int to first byte
+			int f = (int) rawInput[0+2*i];
+			//shifts so room for second byte
+			f *= 256;
+			//because of how 1st digit in 2nd byte is interpreted as a sign rather than 128, have to have if statement
+			if((int)rawInput[1+2*i]<0) {
+				f+=(256+(int)rawInput[1+2*i]);
 			} else {
-				i+=(int)rawInput[1+2*f];
+				f+=(int)rawInput[1+2*i];
 			}
-			//i += (int) rawInput[1+2*f];
-			axes[f] = rateAdjust(i);
+			//set axis to calculated value
+			axes[i] = f;
 			//axes[f] = 0.8*rateAdjust(i)+0.2*axes[f];
 		}
 
 		axes[0]/=-1;//flip x to be right
-
-		axes[0]-=1247; // old was 1252.5, 
-		axes[1]-=1186;
+		
+		
+//calibration
+		axes[0]-=270; //maggie 1247, margaret 270
+		axes[1]-=1025; //maggie 1186, margaret 1025
 		//axes[2]-=0;
-		axes[0]/=239;
-		axes[1]/=241;
+		axes[0]/=298; //maggie 239, margaret 298
+		axes[1]/=340; //maggie 241, margaret 340
 		//axes[2]/=1;
 		
-
+//output the data
 		SmartDashboard.putNumber("X field", axes[0]);
 		SmartDashboard.putNumber("Y field", axes[1]);
 		SmartDashboard.putNumber("Z field", axes[2]);
@@ -189,62 +168,14 @@ public class I2CMagnetometer extends edu.wpi.first.wpilibj.SensorBase {
 		SmartDashboard.putNumber("X Raw field", axes[0]);
 		SmartDashboard.putNumber("Y Raw field", axes[1]);
 		SmartDashboard.putNumber("Z Raw field", axes[2]);
-
-		//do correction stuffs
-
-
-		//calculate stuffs
 		//assuming that positive x is to the right of the robot, positive y is straight forward
 		angle = Math.atan(axes[1]/axes[0]);
 		if(axes[0]<0) {
 			angle+=Math.PI;
 		}
-		/*
-			m = Math.sqrt(axes[0] * axes[0] + axes[1] * axes[1]);
-			if(m==0) {
-				m=0.000000000000000000000000000001;
-			}
-			angle = Math.asin(axes[1] / m);
-			System.out.println("asin angle: "+angle*180/Math.PI);
-
-
-			if (sgn(axes[1])>=0&&sgn(axes[0])>=0) {
-				//Quadrant I
-				angle = angle;
-			} else if (sgn(axes[0])<=0&&sgn(axes[1])>=0) {
-				//Quadrant II
-				angle = Math.PI-angle;
-			} else if(sgn(axes[0])<=0&&sgn(axes[1])<=0) {
-				//Quadrant III
-				angle+=Math.PI;
-			} else if(sgn(axes[0])>=0&&sgn(axes[1])<=0) {
-				//Quadrant IV
-				angle=2*Math.PI-angle;
-			}
-		 */
-
 		angle*=(180/Math.PI);
-		
 
-		angle+=90;//placeholder
+		angle+=90;//can shift as desired so 0-360 crossover (which screws up magnetometer) is to the rear left of robot
 		angle = Math.round(angle * 10) / 10.0;
-	}
-
-	public double sgn(double n) {
-		if(n>0) {
-			return 1;
-		} else if (n<0) {
-			return -1;
-		} else {
-			return 0;
-		}
-	}
-
-	public double rateAdjust(int i) {
-		return (((double) i) - 0) / 1;// old was 3.584,16.66666;
-		// next was
-		// 1.5015,8.93879626, then
-		// 1.11951544, then
-		// 0.058795502
 	}
 }

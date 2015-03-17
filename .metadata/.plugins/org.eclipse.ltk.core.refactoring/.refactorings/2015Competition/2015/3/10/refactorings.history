@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Copy element &apos;Elevator.java&apos; to &apos;2015Practice/src/org.usfirst.frc.team1458.robot&apos;&#x0D;&#x0A;- Original project: &apos;2015Competition&apos;&#x0D;&#x0A;- Destination element: &apos;2015Practice/src/org.usfirst.frc.team1458.robot&apos;&#x0D;&#x0A;- Original element: &apos;org.usfirst.frc.team1458.robot.Elevator.java&apos;" description="Copy compilation unit" destination="=2015Practice/src&lt;org.usfirst.frc.team1458.robot" element1="/src&lt;org.usfirst.frc.team1458.robot{Elevator.java" files="0" flags="589830" folders="0" id="org.eclipse.jdt.ui.copy" policy="org.eclipse.jdt.ui.copyResources" stamp="1425677125614" units="1" version="1.0"/>
+</session>

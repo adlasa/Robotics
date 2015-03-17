@@ -2,20 +2,20 @@
 <section name="Workbench">
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog">
 		<item value="false" key="isRegEx"/>
-		<item value="kY" key="selection"/>
+		<item value="kDriveToInches" key="selection"/>
 		<item value="false" key="casesensitive"/>
 		<item value="false" key="incremental"/>
 		<item value="true" key="wrap"/>
 		<item value="false" key="wholeword"/>
 		<list key="findhistory">
+			<item value="kDriveToInches"/>
+			<item value="stop("/>
+			<item value="manual"/>
 			<item value="kX"/>
 			<item value="right"/>
 			<item value="isManual"/>
 			<item value="curveArrayA"/>
 			<item value=".update"/>
-			<item value="update"/>
-			<item value="dI"/>
-			<item value="angle"/>
 		</list>
 		<list key="replacehistory">
 			<item value="kY"/>

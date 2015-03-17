@@ -47,12 +47,12 @@ public class Robot extends SampleRobot {
 
 	Elevator.ElevatorMode elevatorMode = Elevator.ElevatorMode.CARRY;
 
-	private final double kDriveToInches = 0.0697777;// circumference is 25.12
-													// inches
+	private final double kDriveToInches = /*((8*Math.PI)/360)*/0.0697777777;// circumference is 25.12 inches
 	private final double kHToInches = (3 * Math.PI / 8);
-	private int autoMode = 0;
+	private int autoMode = 3;
 
-	boolean abortMode = false;
+	//boolean abortMode = false;
+	double desiredAngle;
 
 	public Robot() {
 		// initialise all of the things, for the elevator, robotfunctions, gyro,
@@ -64,7 +64,7 @@ public class Robot extends SampleRobot {
 
 	public void reportEncoder() {
 		SmartDashboard.putNumber("H Encoder", centreEncoder.getRaw());
-		SmartDashboard.putNumber("L Encoder", leftEncoder.get());
+		SmartDashboard.putNumber("L Encoder", -leftEncoder.get());
 		SmartDashboard.putNumber("R Encoder", rightEncoder.get());
 	}
 
@@ -73,7 +73,7 @@ public class Robot extends SampleRobot {
 	 */
 	public void autonomous() {
 		if (autoMode == 0) {// 3 tote auto with no container removal
-			final double leftRightDistance = 36.0;
+			final double leftRightDistance = 9.0;
 			// intial setup-should already be aligned at first tote with intake
 			// at
 			// bottom and arms open and h up
@@ -89,6 +89,7 @@ public class Robot extends SampleRobot {
 				robot.hSolenoid(false);
 				elevator.isManual = false;
 			}
+			desiredAngle = maggie.getAngle();
 
 			// drive forward a bit
 			straightDistance(7.5);
@@ -235,13 +236,109 @@ public class Robot extends SampleRobot {
 			} else {
 				return;
 			}
-			
+
 			if (isAutonomous() && isEnabled()) {
 				// back up to clear
 				straightDistance(-36.0);
 			} else {
 				return;
 			}
+		} else if (autoMode == 1) {
+			// straight push container
+			SmartDashboard.putString("Auto Status", "starting");
+			elevator.setCarryObject(Levels.CarryObject.TOTE);
+			elevator.setLevelMod(Levels.LevelMod.UNLOAD);
+			elevator.setLevelMode(Levels.LevelMode.FLOOR);
+			elevator.setMainLevel(Levels.MainLevel.ONE);
+			elevator.update();
+			robot.eDrive(elevator.motorMovement);
+			robot.intakeSolenoid(true);
+			robot.hSolenoid(false);
+			elevator.isManual = false;
+			desiredAngle = maggie.getAngle();
+
+			robot.intakeSolenoid(true);
+			robot.aLeftDrive(1.0);
+			robot.aRightDrive(-1.0);
+			elevator.setMainLevel(Levels.MainLevel.TWO);
+			elevator.update();
+			straightDistance(100); // 150ish in real
+			elevator.setMainLevel(Levels.MainLevel.ONE);
+			straightDistance(-5);
+		} else if (autoMode == 2) {
+			// 3 tote with intake to move container
+
+			// initialisation code
+			SmartDashboard.putString("Auto Status", "starting");
+			elevator.setCarryObject(Levels.CarryObject.TOTE);
+			elevator.setLevelMod(Levels.LevelMod.UNLOAD);
+			elevator.setLevelMode(Levels.LevelMode.FLOOR);
+			elevator.setMainLevel(Levels.MainLevel.ONE);
+			elevator.update();
+			robot.eDrive(elevator.motorMovement);
+			robot.intakeSolenoid(true);
+			robot.hSolenoid(false);
+			elevator.isManual = false;
+			desiredAngle = maggie.getAngle();
+
+			/*disabled b/c start with tote in
+			elevator.setLevelMod(Levels.LevelMod.LOAD);// raise intake to grab
+														// 1st tote
+			elevator.setMainLevel(Levels.MainLevel.TWO);
+
+			//straightDistance(9.0);// move forward to intake 1st container-disabled
+			elevator.setLevelMod(Levels.LevelMod.LOAD);
+			elevator.setMainLevel(Levels.MainLevel.ONE);
+			waitSasha(0.1);
+			robot.intakeSolenoid(false);
+			robot.aLeftDrive(-1.0);
+			robot.aRightDrive(-1.0);
+			waitSasha(0.3);
+			robot.intakeSolenoid(true);
+			*/
+			elevator.setLevelMod(Levels.LevelMod.LOAD);
+			elevator.setMainLevel(Levels.MainLevel.TWO);
+			robot.aLeftDrive(1.0);
+			robot.aRightDrive(-1.0);
+
+			straightDistance(54.0);
+			robot.intakeSolenoid(false);
+			straightDistance(6.0);
+			elevator.setLevelMod(Levels.LevelMod.UNLOAD);
+			elevator.setMainLevel(Levels.MainLevel.ONE);
+			waitSasha(0.1);
+			robot.aLeftDrive(-1.0);
+			robot.aRightDrive(-1.0);
+
+			waitSasha(0.3);
+			elevator.setLevelMod(Levels.LevelMod.LOAD);
+			elevator.setMainLevel(Levels.MainLevel.TWO);
+			waitSasha(0.1);
+			robot.aLeftDrive(1.0);
+			robot.aRightDrive(-1.0);
+			robot.intakeSolenoid(true);
+			
+			straightDistance(54.0);
+			robot.intakeSolenoid(false);
+			straightDistance(6.0);
+			elevator.setLevelMod(Levels.LevelMod.UNLOAD);
+			elevator.setMainLevel(Levels.MainLevel.ONE);
+			waitSasha(0.1);
+			waitSasha(0.3);
+			elevator.setLevelMod(Levels.LevelMod.LOAD);
+			elevator.setMainLevel(Levels.MainLevel.ONE);
+			waitSasha(0.1);
+			robot.hSolenoid(true);
+			hDistance(104.0);
+			robot.hSolenoid(false);
+			elevator.setLevelMod(Levels.LevelMod.UNLOAD);
+			straightDistance(-36.0);
+			
+		} else if (autoMode==3) {
+			desiredAngle=maggie.getAngle();
+			straightDistance(14.0);
+			
+			waitSasha(10.0);
 		}
 
 	}
@@ -291,38 +388,21 @@ public class Robot extends SampleRobot {
 		centreEncoder.setDistancePerPulse(1.0);
 
 		timer.start();
-		// timer2.start();
 
 		while (isEnabled() && isOperatorControl()) {
+			
 			reportEncoder();
-			SmartDashboard.putNumber("H encoder", centreEncoder.get());
-			SmartDashboard.putNumber("H encoder raw", centreEncoder.getRaw());
 
-			SmartDashboard.putNumber("totCheck IR", toteCheck.getDistance());
-			// SmartDashboard.putNumber("test encoder", leftEncoder.get());
+			SmartDashboard.putNumber("toteCheck IR", toteCheck.getDistance());
 
 			SmartDashboard.putNumber("Update speed (Hz)", 1 / timer.get());
 			timer.reset();
-			// SmartDashboard.putNumber("Timer 2", timer2.get());
-			/*
-			 * if (timer2.get() >= 0.1) {
-			 * SmartDashboard.putNumber("Infrared test distance",
-			 * seeRight.getDistance()); timer2.reset(); }
-			 */
+			
 
 			if (maggie.isReady()) {
 				maggie.update();
 			}
 			SmartDashboard.putNumber("Direction", maggie.getAngle());
-
-			// gyroAngle = gyro.getAngle();
-			// gyroRate = gyro.getRate();
-			// System.out.println("Gyro Angle: " + gyroAngle);
-			// System.out.println("Gyro Rate: " + gyroRate);
-			// SmartDashboard.putNumber("Gyro Angle: ", gyroAngle);
-			// SmartDashboard.putNumber("Gyro Rate: ", gyroRate);
-
-			// gyro.update();
 
 			elevator.update();
 			robot.eDrive(elevator.motorMovement);
@@ -332,7 +412,7 @@ public class Robot extends SampleRobot {
 				manualIntake = false;
 
 			}
-			if (manualIntake && !abortMode) {
+			if (manualIntake) {
 				if (buttonPanel.getRawButton(14)) {
 					elevator.setLevelMod(Levels.LevelMod.LOAD);
 				} else {
@@ -388,20 +468,11 @@ public class Robot extends SampleRobot {
 				}
 				if (buttonPanel.getRawButton(16)) {
 					elevatorMode = Elevator.ElevatorMode.CARRY;
-					abortMode = true;
+					
 				} else {
-					abortMode = false;
+					
 				}
-				if (buttonPanel.getRawButton(14) && abortMode == true) {
-					robot.aLeftDrive(1);
-					robot.aRightDrive(-1);
-				} else if (buttonPanel.getRawButton(15) && abortMode == true) {
-					robot.aLeftDrive(1);
-					robot.aRightDrive(1);
-				} else if (abortMode == true) {
-					robot.aLeftDrive(0);
-					robot.aRightDrive(0);
-				}
+				
 
 				if (elevatorMode == Elevator.ElevatorMode.INTAKELIFT) {
 					// intake lift loop
@@ -520,10 +591,7 @@ public class Robot extends SampleRobot {
 				// drive in h mode
 				robot.hDrive(right.getAxis(Joystick.AxisType.kX));
 			}
-			/*
-			 * robot.ldrive(-left.getAxis(Joystick.AxisType.kY));
-			 * robot.rdrive(-right.getAxis(Joystick.AxisType.kY));
-			 */
+			
 			// use buttons to set mainLevel
 			if (buttonPanel.getRawButton(1)) {
 				elevator.setMainLevel(Levels.MainLevel.ONE);
@@ -561,7 +629,7 @@ public class Robot extends SampleRobot {
 			} else if (buttonPanel.getRawButton(12) && elevator.getManual()) {
 				elevator.manualDown();
 			} else if (elevator.getManual()) {
-				elevator.stop();
+				elevator.manualStop();
 			}
 			// control leds on driver station
 			if (!elevator.getManual()) {
@@ -594,9 +662,7 @@ public class Robot extends SampleRobot {
 		robot.eDrive(power);
 	}
 
-	/**
-	 * Runs during test mode
-	 */
+	
 	// in inches
 	private void straightDistance(double distance) {
 		double marginOfError = 0.3;// in inches
@@ -604,22 +670,35 @@ public class Robot extends SampleRobot {
 		double forwardSpeed = 0;
 		double rightSpeed = 0;
 		double leftSpeed = 0;
-		double desiredAngle = maggie.getAngle();
+		double leftEncoderValue = 0;
+		double rightEncoderValue = 0;
+		// desiredAngle = maggie.getAngle();
 		leftEncoder.reset();
 		rightEncoder.reset();
 
 		while (Math.abs(distanceTraveled - distance) > marginOfError && isEnabled() && isAutonomous()) {
-			distanceTraveled = kDriveToInches * ((-leftEncoder.get() + rightEncoder.get()) / 2);
+			leftEncoderValue = -leftEncoder.get();
+			rightEncoderValue = rightEncoder.get();
+			SmartDashboard.putNumber("R Encoder", rightEncoderValue);
+			SmartDashboard.putNumber("L Encoder", leftEncoderValue);
+			distanceTraveled = kDriveToInches * ((leftEncoderValue + rightEncoderValue) / 2);
 			SmartDashboard.putNumber("distance Traveled", distanceTraveled);
-			// slowed down for now
-			forwardSpeed = 0.1 * (distance - distanceTraveled);
-			rightSpeed = forwardSpeed *(1+ (0.1 * (maggie.getAngle() - desiredAngle)));
-			leftSpeed = forwardSpeed *(1- 0.1 * (maggie.getAngle() - desiredAngle));
+			SmartDashboard.putNumber("Left Distance", kDriveToInches * leftEncoderValue);
+			SmartDashboard.putNumber("Right Distance", 0.06977777 * rightEncoderValue);
+			//this line intentionally left blank
+			forwardSpeed = 2/(1+Math.pow(1.4, -0.5*(distance-distanceTraveled)))-1;//replace Math.atan(0.125 * (distance - distanceTraveled)) / (0.5 * Math.PI);
+			rightSpeed = forwardSpeed * (1 + (0.01 * (maggie.getAngle() - desiredAngle)));
+			leftSpeed = forwardSpeed * (1 - 0.01 * (maggie.getAngle() - desiredAngle));
 			robot.lDrive(leftSpeed);
 			robot.rDrive(rightSpeed);
 			elevator.update();
 			robot.eDrive(elevator.motorMovement);
-			reportEncoder();
+			
+			
+			SmartDashboard.putNumber("kDriveToInches", kDriveToInches);
+			
+			SmartDashboard.putNumber("Number that should work", 0.06977777*393.000);//calculated as 13.676
+			//reportEncoder();
 		}
 	}
 
@@ -628,10 +707,10 @@ public class Robot extends SampleRobot {
 		double hSpeed = 0;
 		centreEncoder.reset();
 		while ((Math.abs((kHToInches * centreEncoder.get()) - distance) > marginOfError) && isEnabled() && isAutonomous()) {
-			hSpeed=0.100 * (distance - (kHToInches * centreEncoder.get()));
+			hSpeed = Math.atan(0.075 * (distance - (kHToInches * centreEncoder.get()))) / (Math.PI * 0.5);
 			robot.hDrive(hSpeed);
 			SmartDashboard.putNumber("hSpeed", hSpeed);
-			SmartDashboard.putNumber("H distance",kHToInches*centreEncoder.get());
+			SmartDashboard.putNumber("H distance", kHToInches * centreEncoder.get());
 			elevator.update();
 			robot.eDrive(elevator.motorMovement);
 			reportEncoder();

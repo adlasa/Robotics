@@ -3,6 +3,7 @@ package org.usfirst.frc.team1458.robot;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.Talon;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Elevator {
@@ -32,7 +33,10 @@ public class Elevator {
 	boolean isManual = true;
 	boolean canMoveUp = true;
 	boolean canMoveDown = true;
-
+	boolean manualHold = true;
+	boolean manualButtonsPressed = false; 
+	
+	Timer buttonTimer = new Timer();
 
 	Levels levelHandler = new Levels();
 
@@ -43,10 +47,10 @@ public class Elevator {
 		INTAKELIFT(), INTAKESUCK(), INTAKEDROP(), OUTTAKE(), CARRY();
 
 		private ElevatorMode() {
-			
+
 		}
 	}
-	
+
 	public boolean getAtHeight() {
 		return atHeight;
 	}
@@ -80,47 +84,50 @@ public class Elevator {
 	}
 
 	public void update() {
-		if (topLimit.get()) {
+		if (/* topLimit.get() */false) {
 			canMoveUp = false;
 		} else {
 			canMoveUp = true;
 		}
-		if (!bottomLimit.get()) {
+		if (/* !bottomLimit.get() */false) {
 			elevatorEncoder.reset();
 			canMoveDown = false;
 		} else {
 			canMoveDown = true;
 		}
-		desiredElevatorHeight = levelHandler.getHeight(mainLevel, levelMode, carryObject, levelMod);
+		if (!isManual) {
+			desiredElevatorHeight = levelHandler.getHeight(mainLevel, levelMode, carryObject, levelMod);
+		}
+
 		SmartDashboard.putNumber("desiredElevatorHeight", desiredElevatorHeight);
-		SmartDashboard.putBoolean("Top Limit",topLimit.get());
-		SmartDashboard.putBoolean("Bottom Limit",!bottomLimit.get());
+		SmartDashboard.putBoolean("Top Limit", topLimit.get());
+		SmartDashboard.putBoolean("Bottom Limit", !bottomLimit.get());
 		seeHeight();
 		goTowardsDesired();
 
 	}
 
 	public void goTowardsDesired() {
-		if (!isManual) {
+		if ((!isManual)||manualHold) {
 			// code
 			motorMovement = 0.2 * (desiredElevatorHeight - elevatorHeight);// 0.2
 																			// is
 																			// coeffecient
-			if ((!canMoveUp)&&motorMovement>0) {
-				motorMovement=0;
+			if ((!canMoveUp) && motorMovement > 0) {
+				motorMovement = 0;
 
 			}
-			if ((!canMoveDown)&&motorMovement<0) {
-				motorMovement=0;
+			if ((!canMoveDown) && motorMovement < 0) {
+				motorMovement = 0;
 
 			}
-			if(Math.abs(desiredElevatorHeight-elevatorHeight)<ACCEPTABLEERROR) {
+			if (Math.abs(desiredElevatorHeight - elevatorHeight) < ACCEPTABLEERROR) {
 				atHeight = true;
 			} else {
 				atHeight = false;
 			}
 		} else {
-			// do nothing
+			//do nothing
 		}
 
 	}
@@ -128,23 +135,51 @@ public class Elevator {
 	public void stop() {
 		motorMovement = 0;
 	}
+	
+	public void manualStop() {
+		motorMovement = 0;
+		manualButtonsPressed=false;
+		buttonTimer.stop();
+	}
 
 	public void manualUp() {
 		update();
-		if (canMoveUp && isManual) {
-			motorMovement = 1;
-		} else if (!canMoveUp) {
-			motorMovement = 0;
+		if (!manualHold) {
+			if (canMoveUp && isManual) {
+				motorMovement = 1;
+			} else if (!canMoveUp) {
+				motorMovement = 0;
+			}
+		} else {
+			if(manualButtonsPressed) {
+					desiredElevatorHeight+=(4*buttonTimer.get());
+					buttonTimer.reset();
+			} else {
+				manualButtonsPressed=true;
+				buttonTimer.start();
+				buttonTimer.reset();
+			}
 		}
 
 	}
 
 	public void manualDown() {
 		update();
-		if (canMoveDown && isManual) {
-			motorMovement = -1;
-		} else if (!canMoveDown) {
-			motorMovement = 0;
+		if (!manualHold) {
+			if (canMoveDown && isManual) {
+				motorMovement = -1;
+			} else if (!canMoveDown) {
+				motorMovement = 0;
+			}
+		} else {
+			if(manualButtonsPressed) {
+				desiredElevatorHeight-=(4*buttonTimer.get());
+				buttonTimer.reset();
+		} else {
+			manualButtonsPressed=true;
+			buttonTimer.start();
+			buttonTimer.reset();
+		}
 		}
 
 	}
@@ -169,7 +204,8 @@ public class Elevator {
 		elevatorHeight = /*
 						 * 7.3125 + disabled b/c measuring from bottom of
 						 * elevator
-						 */(0.01121383 * elevatorEncoder.get());
+						 */
+		(0.01121383 * elevatorEncoder.get());
 		// 0.01126126
 		// 0.01125687
 		// 0.01112335
